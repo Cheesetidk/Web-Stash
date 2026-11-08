@@ -5,96 +5,116 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Cheeset's web stash</title>
 <meta name="description" content="Cheeset's web stash">
-<meta name="theme-color" content="#0d1522">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230d1522'/%3E%3Cpath d='M20 16v10M32 24v14M44 14v12M26 36v12M40 40v10' stroke='%238fb8d8' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#2a2038">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23f2b8a2'/%3E%3Cstop offset='1' stop-color='%23463a68'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='18' fill='url(%23g)'/%3E%3Crect x='7' y='7' width='50' height='50' rx='13' fill='none' stroke='white' stroke-opacity='.55' stroke-width='2'/%3E%3Ccircle cx='32' cy='32' r='9' fill='white' fill-opacity='.85'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;1,9..144,300&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#e8eef6;
-    --ink-soft:#9fb0c4;
-    --night:#0b121e;
-    --dusk:#142033;
-    --pane:#1b2b42;
-    --mist:#8fb8d8;
-    --lilac:#a99bd0;
-    --moss:#7fb5a6;
-    --glass:rgba(235,244,255,.15);
-    --glass-bright:rgba(242,248,255,.24);
-    --glass-edge:rgba(245,250,255,.38);
-    --radius:22px;
+    --ink:#fffaf6;
+    --ink-soft:rgba(255,246,240,.8);
+    --ink-faint:rgba(255,246,240,.58);
     --display:"Fraunces", Georgia, "Times New Roman", serif;
     --ui:"DM Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --ease:cubic-bezier(.22,1,.36,1);
+
+    /* How much the page darkens the video behind the text. 0 = none. Safe range: 0 to .5 */
+    --veil-top:.30;
+    --veil-bottom:.30;
+
+    /* the glass recipe, shared by every panel */
+    --glass-fill:linear-gradient(135deg,rgba(255,255,255,.27) 0%,rgba(255,255,255,.09) 38%,rgba(255,255,255,.05) 62%,rgba(255,255,255,.18) 100%);
+    --glass-tint:rgba(34,20,54,.12);
+    --glass-blur:blur(18px) saturate(185%) brightness(1.05);
+    --glass-edge:rgba(255,255,255,.3);
+    --glass-shadow:
+      inset 0 1px 0 rgba(255,255,255,.62),
+      inset 0 -1px 0 rgba(255,255,255,.12),
+      inset 0 0 26px rgba(255,255,255,.07),
+      0 22px 46px -18px rgba(20,8,40,.5),
+      0 2px 8px rgba(20,8,40,.12);
   }
   *{box-sizing:border-box}
   html,body{margin:0;min-height:100%}
   body{
     font-family:var(--ui);
     color:var(--ink);
-    background:#0b121e;
+    /* shows while the video loads, and if it ever can't: same colours as the sky in the video */
+    background:linear-gradient(180deg,#e7b8a6 0%,#b98ea0 34%,#5a4468 66%,#241d38 100%) fixed;
     -webkit-font-smoothing:antialiased;
     overflow-x:hidden;
     padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
   }
-  .backdrop-video{position:fixed;inset:0;width:100%;height:100%;z-index:0;object-fit:contain;pointer-events:none;opacity:.82;filter:brightness(.74) saturate(.86)}
-  .backdrop-shade{position:fixed;inset:0;z-index:0;pointer-events:none;background:linear-gradient(180deg,rgba(8,13,22,.2),rgba(8,13,22,.34) 70%,rgba(8,13,22,.5))}
-  .fog{position:fixed;inset:-20%;z-index:0;pointer-events:none;filter:blur(60px);opacity:.18}
-  .fog i{position:absolute;border-radius:50%;display:block}
-  .fog i:nth-child(1){width:55vmax;height:40vmax;left:-10%;top:5%;background:radial-gradient(closest-side,rgba(88,128,170,.55),transparent);animation:fog1 58s ease-in-out infinite alternate}
-  .fog i:nth-child(2){width:50vmax;height:38vmax;right:-8%;top:30%;background:radial-gradient(closest-side,rgba(130,112,184,.4),transparent);animation:fog2 66s ease-in-out infinite alternate}
-  .fog i:nth-child(3){width:60vmax;height:30vmax;left:20%;bottom:-12%;background:radial-gradient(closest-side,rgba(78,140,128,.35),transparent);animation:fog1 72s ease-in-out infinite alternate-reverse}
-  @keyframes fog1{to{transform:translate3d(8vw,4vh,0) scale(1.15)}}
-  @keyframes fog2{to{transform:translate3d(-9vw,-5vh,0) scale(1.1)}}
 
-  .wrap{position:relative;z-index:1;max-width:1500px;margin:0 auto;padding:clamp(28px,6vw,72px) clamp(18px,4vw,40px) 120px}
+  /* ---------- background video: full strength, edge to edge ---------- */
+  .backdrop-video{
+    position:fixed;inset:0;width:100%;height:100%;z-index:0;
+    object-fit:cover;object-position:center 60%;
+    pointer-events:none;background:transparent;
+  }
+  /* only a soft fade behind the title and the very bottom, so text stays readable. nothing in the middle. */
+  .veil{
+    position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:
+      linear-gradient(180deg,rgba(28,16,46,var(--veil-top)) 0%,rgba(28,16,46,0) 40%),
+      linear-gradient(0deg,rgba(20,12,36,var(--veil-bottom)) 0%,rgba(20,12,36,0) 36%);
+  }
 
-  header{text-align:center;margin-bottom:clamp(28px,5vw,52px)}
+  .wrap{position:relative;z-index:1;max-width:1500px;margin:0 auto;padding:clamp(30px,6vw,76px) clamp(18px,4vw,40px) 120px}
+
+  header{text-align:center;margin-bottom:clamp(30px,5vw,56px)}
   h1{
-    font-family:var(--display);
-    font-weight:300;
-    font-size:clamp(2.4rem,7vw,4.6rem);
-    letter-spacing:-.02em;
-    line-height:1.05;
-    margin:0;
-    text-shadow:0 0 40px rgba(143,184,216,.35);
-    animation:rise 1.4s cubic-bezier(.2,.7,.2,1) both;
+    font:300 clamp(2.6rem,7vw,5rem)/1.04 var(--display);
+    letter-spacing:-.025em;margin:0;color:#fff;
+    text-shadow:0 2px 30px rgba(44,22,60,.5),0 0 70px rgba(255,214,190,.28);
+    animation:rise 1.8s var(--ease) both;
   }
   .sub{
-    font-family:var(--display);
-    font-style:italic;
-    font-weight:300;
-    color:var(--ink-soft);
-    font-size:clamp(1rem,2.2vw,1.25rem);
-    margin:.7rem 0 0;
-    animation:rise 1.4s .25s cubic-bezier(.2,.7,.2,1) both;
+    font-family:var(--display);font-style:italic;font-weight:300;
+    color:var(--ink-soft);font-size:clamp(1rem,2.2vw,1.3rem);margin:.8rem 0 0;
+    text-shadow:0 1px 18px rgba(44,22,60,.55);
+    animation:rise 1.8s .3s var(--ease) both;
   }
-  @keyframes rise{from{opacity:0;transform:translateY(14px);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+  @keyframes rise{from{opacity:0;transform:translateY(14px);filter:blur(8px)}to{opacity:1;transform:none;filter:none}}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+  /* ---------- glass surfaces (pills, notes, toast) ---------- */
+  .tabs,.search,.media-back,.media-refresh,.note,.toast{
+    background:var(--glass-fill),var(--glass-tint);
+    -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+    border:1px solid var(--glass-edge);
+    box-shadow:var(--glass-shadow);
+  }
 
   .bar{
     display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;
-    margin-bottom:26px;
-    animation:rise 1.4s .5s cubic-bezier(.2,.7,.2,1) both;
+    margin-bottom:30px;
+    animation:rise 1.8s .55s var(--ease) both;
   }
-  .tabs{display:flex;gap:6px;padding:5px;border-radius:999px;background:var(--glass);border:1px solid var(--glass-edge);box-shadow:inset 0 1px rgba(255,255,255,.28),0 12px 36px rgba(13,25,42,.14);backdrop-filter:blur(22px) saturate(1.3);-webkit-backdrop-filter:blur(22px) saturate(1.3)}
+  .tabs{display:flex;gap:4px;padding:5px;border-radius:999px}
   .tab{
     appearance:none;border:0;background:transparent;color:var(--ink-soft);
-    font:500 .95rem var(--ui);padding:9px 20px;border-radius:999px;cursor:pointer;
-    transition:background .3s,color .3s;
+    font:500 .95rem var(--ui);padding:10px 22px;border-radius:999px;cursor:pointer;
+    text-shadow:0 1px 8px rgba(34,16,52,.35);
+    transition:background .5s var(--ease),color .3s,box-shadow .5s var(--ease);
   }
-  .tab:hover{color:var(--ink)}
-  .tab[aria-selected="true"]{background:var(--glass-bright);color:#fff;box-shadow:inset 0 1px rgba(255,255,255,.4),0 2px 12px rgba(18,34,52,.16)}
+  .tab:hover{color:#fff}
+  .tab[aria-selected="true"]{
+    color:#fff;background:rgba(255,255,255,.28);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 4px 14px -4px rgba(30,14,50,.4);
+  }
   .search{
-    flex:0 1 260px;min-width:160px;
-    background:var(--glass);border:1px solid var(--glass-edge);color:var(--ink);
-    padding:11px 18px;border-radius:999px;font:400 .95rem var(--ui);outline:none;
-    box-shadow:inset 0 1px rgba(255,255,255,.28),0 12px 36px rgba(13,25,42,.14);
-    backdrop-filter:blur(22px) saturate(1.3);-webkit-backdrop-filter:blur(22px) saturate(1.3);
-    transition:background .3s,border-color .3s, box-shadow .3s;
+    flex:0 1 270px;min-width:170px;color:#fff;outline:none;
+    padding:11px 18px 11px 42px;border-radius:999px;font:400 .95rem var(--ui);
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-opacity='.8' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat 16px 50%/16px,
+      var(--glass-fill),var(--glass-tint);
+    transition:border-color .4s,box-shadow .5s var(--ease);
   }
-  .search::placeholder{color:rgba(239,246,255,.72)}
-  .search:focus{background:rgba(245,249,255,.22);border-color:rgba(255,255,255,.58);box-shadow:0 0 0 4px rgba(220,237,255,.14),0 12px 36px rgba(13,25,42,.14)}
-  .tab:focus-visible,.card:focus-visible,.media-back:focus-visible,.media-refresh:focus-visible,.player button:focus-visible,.player input:focus-visible{outline:2px solid var(--mist);outline-offset:3px}
+  .search::placeholder{color:var(--ink-faint)}
+  .search:focus{border-color:rgba(255,255,255,.7);box-shadow:var(--glass-shadow),0 0 0 4px rgba(255,255,255,.16)}
+  .tab:focus-visible,.card:focus-visible,.media-back:focus-visible,.media-refresh:focus-visible,.pbtn:focus-visible,.player input:focus-visible{outline:2px solid #fff;outline-offset:3px}
 
   .grid{
     display:grid;gap:30px;
@@ -104,156 +124,200 @@
 
   /* ---------- panels ---------- */
   .card{
-    --h:210;--mx:50%;--my:50%;--rx:0deg;--ry:0deg;--d:0s;
+    --h:210;--mx:50%;--my:50%;--rx:0deg;--ry:0deg;--ty:0px;--d:0s;
     position:relative;display:block;aspect-ratio:16/10;
-    border-radius:var(--radius);overflow:hidden;isolation:isolate;
+    border-radius:32px;overflow:hidden;isolation:isolate;
     color:var(--ink);text-decoration:none;cursor:pointer;
-    background:linear-gradient(145deg,rgba(238,247,255,.22),rgba(213,232,255,.08));
-    border:1px solid rgba(245,250,255,.4);
-    box-shadow:0 22px 54px -22px rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.44),inset 0 0 0 1px rgba(190,215,240,.08);
-    -webkit-backdrop-filter:blur(20px) saturate(1.3);
-    backdrop-filter:blur(20px) saturate(1.3);
-    transform:perspective(900px) rotateX(var(--rx)) rotateY(var(--ry));
-    transition:transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .4s;
+    background:var(--glass-fill),var(--glass-tint);
+    -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+    box-shadow:var(--glass-shadow);
+    transform:perspective(1100px) translateY(var(--ty)) rotateX(var(--rx)) rotateY(var(--ry));
+    transition:transform .7s var(--ease),box-shadow .7s var(--ease);
     -webkit-tap-highlight-color:transparent;
   }
-  .card.live{animation:cardIn .9s var(--stagger,0s) cubic-bezier(.2,.7,.2,1) both}
-  @keyframes cardIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1}}
-  .card:hover{box-shadow:0 26px 54px -18px rgba(0,0,0,.6),0 0 38px -8px hsl(var(--h) 60% 65% / .3),inset 0 1px rgba(255,255,255,.58)}
-  .card .bg{
-    position:absolute;inset:-35%;z-index:-3;
-    opacity:.52;
-    background:
-      radial-gradient(55% 55% at 28% 30%, hsl(var(--h) 55% 46% / .9), transparent 70%),
-      radial-gradient(50% 50% at 76% 72%, hsl(calc(var(--h) + 55) 50% 42% / .85), transparent 70%),
-      radial-gradient(40% 40% at 70% 20%, hsl(calc(var(--h) - 40) 45% 50% / .55), transparent 70%),
-      linear-gradient(135deg, hsl(var(--h) 40% 20%), hsl(calc(var(--h) + 30) 45% 12%));
-    animation:drift 28s ease-in-out infinite alternate;
-    animation-delay:var(--d);
+  .card.has-cover{-webkit-backdrop-filter:none;backdrop-filter:none} /* image is opaque, so skip the blur and save GPU */
+  .card.live{animation:cardIn 1.2s var(--stagger,0s) var(--ease) both}
+  @keyframes cardIn{from{opacity:0;transform:translateY(22px) scale(.97)}to{opacity:1}}
+  .card:hover{
+    --ty:-5px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.75),inset 0 -1px 0 rgba(255,255,255,.14),inset 0 0 30px rgba(255,255,255,.1),
+      0 32px 60px -20px rgba(20,8,40,.55),0 0 64px -14px hsl(var(--h) 90% 82% / .6);
   }
-  @keyframes drift{
-    from{transform:translate3d(-5%,-4%,0) rotate(0deg) scale(1.02)}
-    to{transform:translate3d(5%,4%,0) rotate(4deg) scale(1.1)}
+  .card:active{--ty:-1px;transition-duration:.25s}
+
+  /* soft pastel aurora, tinted per panel; drifts very slowly */
+  .card .bg{
+    position:absolute;inset:-30%;z-index:0;
+    background:
+      radial-gradient(45% 45% at 24% 26%,hsl(var(--h) 85% 82% / .5),transparent 70%),
+      radial-gradient(42% 42% at 78% 74%,hsl(calc(var(--h) + 60) 80% 74% / .42),transparent 70%),
+      radial-gradient(34% 34% at 74% 18%,hsl(calc(var(--h) - 50) 85% 84% / .32),transparent 70%);
+    animation:aurora 38s ease-in-out infinite alternate;animation-delay:var(--d);
+  }
+  @keyframes aurora{
+    from{transform:translate3d(-4%,-3%,0) rotate(0deg) scale(1.02)}
+    to{transform:translate3d(4%,3%,0) rotate(5deg) scale(1.1)}
   }
   .card .cover{
-    position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;
-    opacity:.55;filter:saturate(.85) brightness(.85);
-    transition:opacity .5s, transform 1.2s;
+    position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;
+    filter:saturate(1.06);transition:transform 1.6s var(--ease);
   }
-  .card::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:linear-gradient(145deg,rgba(244,249,255,.22),rgba(220,237,255,.03) 56%,rgba(205,229,255,.12));}
-  .card:hover .cover{opacity:.75;transform:scale(1.05)}
-  .card .initial{
-    position:absolute;right:-.06em;top:-.22em;z-index:-1;
-    font:300 9.5rem/1 var(--display);color:rgba(255,255,255,.09);
-    user-select:none;pointer-events:none;
+  .card:hover .cover{transform:scale(1.04)}
+  .card .gloss{position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.17),rgba(255,255,255,0) 36%)}
+  .card .shine{
+    position:absolute;inset:0;z-index:2;pointer-events:none;
+    background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.2) 47%,rgba(255,255,255,.05) 54%,transparent 70%);
+    transform:translateX(-120%);animation:glide 16s ease-in-out infinite;animation-delay:var(--d);
   }
-  .card::after{
-    content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
-    background:radial-gradient(260px circle at var(--mx) var(--my), rgba(255,255,255,.16), transparent 60%);
-    opacity:0;transition:opacity .35s;
+  @keyframes glide{0%,62%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+  .card:not(.vis) .bg,.card:not(.vis) .shine{animation-play-state:paused}
+  .card::before{ /* bright glass rim */
+    content:"";position:absolute;inset:0;border-radius:inherit;padding:1.2px;z-index:6;pointer-events:none;
+    background:linear-gradient(140deg,rgba(255,255,255,.85),rgba(255,255,255,.08) 34%,rgba(255,255,255,0) 62%,rgba(255,255,255,.45));
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+    mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;
+  }
+  .card::after{ /* light that follows the pointer */
+    content:"";position:absolute;inset:0;z-index:3;pointer-events:none;
+    background:radial-gradient(280px circle at var(--mx) var(--my),rgba(255,255,255,.26),transparent 62%);
+    opacity:0;transition:opacity .6s var(--ease);
   }
   .card:hover::after{opacity:1}
+  .card .mono{
+    position:absolute;left:18px;top:18px;z-index:4;width:48px;height:48px;border-radius:50%;
+    display:grid;place-items:center;font:500 1.2rem var(--display);color:#fff;
+    background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.38);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.65),0 8px 20px -8px rgba(30,14,50,.5);
+    text-shadow:0 1px 8px rgba(34,16,52,.45);
+  }
+  .card.has-cover .mono{display:none}
   .card .label{
-    position:absolute;left:0;right:0;bottom:0;z-index:2;
-    padding:46px 18px 16px;
-    background:linear-gradient(to top, rgba(8,14,24,.76), rgba(8,14,24,.34) 55%, transparent);
-    display:flex;align-items:flex-end;justify-content:space-between;gap:10px;
+    position:absolute;left:12px;right:12px;bottom:12px;z-index:5;
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:12px 14px 12px 20px;border-radius:24px;
+    background:linear-gradient(135deg,rgba(255,255,255,.28),rgba(255,255,255,.08)),rgba(30,18,48,.26);
+    -webkit-backdrop-filter:blur(20px) saturate(190%);backdrop-filter:blur(20px) saturate(190%);
+    border:1px solid rgba(255,255,255,.32);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.58),0 12px 26px -12px rgba(20,8,40,.6);
   }
+  .card .lt{min-width:0;display:block}
   .card .name{
-    font:500 1.2rem/1.2 var(--display);letter-spacing:-.005em;
-    text-shadow:0 2px 14px rgba(0,0,0,.56);
-    overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;
+    display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+    font:500 1.14rem/1.2 var(--display);letter-spacing:-.005em;color:#fff;
+    text-shadow:0 1px 12px rgba(34,16,52,.5);
   }
+  .card .meta{display:block;font:400 .8rem var(--ui);color:var(--ink-soft);margin-top:3px;text-shadow:0 1px 8px rgba(34,16,52,.45)}
   .card .play{
-    flex:none;width:36px;height:36px;border-radius:50%;
-    display:grid;place-items:center;
-    background:rgba(255,255,255,.14);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-    opacity:0;transform:translateY(6px) scale(.9);
-    transition:opacity .3s, transform .3s;
+    flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;
+    background:rgba(255,255,255,.28);box-shadow:inset 0 1px 0 rgba(255,255,255,.7);
+    opacity:0;transform:scale(.82);transition:opacity .5s var(--ease),transform .6s var(--ease);
   }
-  .card .play svg{width:14px;height:14px;fill:#fff;margin-left:2px}
+  .card .play svg{width:15px;height:15px;fill:#fff;margin-left:2px}
   .card:hover .play,.card:focus-visible .play{opacity:1;transform:none}
-  @media (hover:none){.card .play{opacity:.85;transform:none}}
+  @media (hover:none){.card .play{opacity:.9;transform:none}}
+
+  /* buttons used as cards (shows, seasons, episodes) */
+  .media-card{appearance:none;width:100%;padding:0;margin:0;border:0;text-align:left;font:inherit}
 
   .skeleton{
-    aspect-ratio:16/10;border-radius:var(--radius);
-    background:linear-gradient(110deg,rgba(27,43,66,.6) 30%,rgba(60,88,124,.35) 50%,rgba(27,43,66,.6) 70%) 0 0/250% 100%;
-    animation:shimmer 2.2s linear infinite;
-    border:1px solid rgba(143,184,216,.08);
+    aspect-ratio:16/10;border-radius:32px;
+    background:linear-gradient(110deg,rgba(255,255,255,.1) 30%,rgba(255,255,255,.26) 50%,rgba(255,255,255,.1) 70%) 0 0/250% 100%;
+    animation:shimmer 2.6s linear infinite;border:1px solid rgba(255,255,255,.22);
   }
   @keyframes shimmer{to{background-position:-150% 0}}
 
   .note{
     text-align:center;color:var(--ink-soft);
-    max-width:520px;margin:50px auto;padding:26px;
-    line-height:1.6;font-size:1.02rem;border:1px solid var(--glass-edge);
-    border-radius:var(--radius);background:var(--glass);
-    box-shadow:inset 0 1px rgba(255,255,255,.3),0 18px 48px rgba(13,25,42,.16);
-    backdrop-filter:blur(22px) saturate(1.25);-webkit-backdrop-filter:blur(22px) saturate(1.25);
+    max-width:540px;margin:50px auto;padding:28px 30px;
+    line-height:1.6;font-size:1.02rem;border-radius:28px;
   }
-  .note h2{font:300 1.7rem var(--display);color:var(--ink);margin:0 0 .5rem}
-  .note code{background:rgba(143,184,216,.12);padding:2px 7px;border-radius:6px;font-size:.9em;color:var(--ink)}
-  .count{color:var(--ink-soft);font-size:.9rem;min-height:1.2em;margin:0 4px 16px}
+  .note h2{font:300 1.75rem var(--display);color:#fff;margin:0 0 .5rem;text-shadow:0 1px 14px rgba(34,16,52,.4)}
+  .note code{background:rgba(255,255,255,.18);padding:2px 8px;border-radius:7px;font-size:.88em;color:#fff}
+  .count{color:var(--ink-soft);font-size:.92rem;min-height:1.2em;margin:0 6px 18px;text-shadow:0 1px 10px rgba(34,16,52,.5)}
 
-  .media-heading{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:6px 0 20px}
-  .media-title{margin:0;font:300 clamp(1.7rem,4vw,2.4rem)/1.1 var(--display)}
+  .media-heading{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:6px 0 22px}
+  .media-title{margin:0;font:300 clamp(1.9rem,4.4vw,2.9rem)/1.1 var(--display);letter-spacing:-.015em;text-shadow:0 2px 24px rgba(34,16,52,.5)}
   .media-actions{display:flex;gap:10px}
-  .media-back,.media-refresh,.player button{
-    border:1px solid var(--glass-edge);color:var(--ink);background:var(--glass);
-    font:500 .92rem var(--ui);padding:10px 15px;border-radius:999px;cursor:pointer;
-    box-shadow:inset 0 1px rgba(255,255,255,.34),0 10px 28px rgba(13,25,42,.14);
-    backdrop-filter:blur(20px) saturate(1.3);-webkit-backdrop-filter:blur(20px) saturate(1.3);
-    transition:background .2s,border-color .2s,transform .2s;
+  .media-back,.media-refresh{
+    color:var(--ink);font:500 .92rem var(--ui);padding:11px 20px;border-radius:999px;cursor:pointer;
+    text-shadow:0 1px 8px rgba(34,16,52,.35);
+    transition:transform .5s var(--ease),border-color .3s,opacity .3s;
   }
-  .media-back:hover,.media-refresh:hover,.player button:hover{background:rgba(245,249,255,.24);border-color:rgba(255,255,255,.56);transform:translateY(-1px)}
-  .media-card{
-    appearance:none;width:100%;padding:0;text-align:left;font:inherit;
-    border:1px solid rgba(255,255,255,.4);
-    background:linear-gradient(145deg,rgba(245,249,255,.19),rgba(214,231,255,.065));
-    box-shadow:0 20px 50px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.4);
-    backdrop-filter:blur(22px) saturate(1.3);-webkit-backdrop-filter:blur(22px) saturate(1.3);
-  }
-  .media-card .cover{opacity:.94;filter:saturate(.92) brightness(1.02)}
-  .media-card:hover .cover{opacity:1}
-  .media-card .label{background:linear-gradient(to top,rgba(5,9,16,.79),rgba(5,9,16,.36) 60%,transparent)}
-  .media-card .meta{display:block;color:rgba(232,238,246,.72);font:400 .82rem var(--ui);margin-top:5px}
-  .episode-card .initial{font-size:clamp(3rem,8vw,6rem);right:12px;top:15px}
+  .media-back:hover,.media-refresh:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.6)}
+  .media-refresh:disabled{opacity:.65;cursor:progress}
   .library-note{max-width:680px}
   .library-note code{word-break:break-word}
+
+  /* ---------- player ---------- */
   .player{
-    position:fixed;inset:0;z-index:10;display:grid;place-items:center;
-    padding:clamp(10px,3vw,34px);background:rgba(3,6,12,.88);
-    backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    position:fixed;inset:0;z-index:20;display:grid;place-items:center;
+    padding:clamp(10px,3vw,40px);
+    background:rgba(14,8,26,.42);
+    -webkit-backdrop-filter:blur(30px) saturate(150%);backdrop-filter:blur(30px) saturate(150%);
+    animation:fadeIn .6s var(--ease) both;
   }
   .player-shell{
     position:relative;width:min(100%,1400px);aspect-ratio:16/9;max-height:calc(100dvh - 40px);
-    display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:18px;
-    background:#000;box-shadow:0 24px 90px rgba(0,0,0,.65);
+    display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:32px;
+    background:#000;border:1px solid rgba(255,255,255,.24);
+    box-shadow:0 40px 120px -20px rgba(8,4,20,.8);
   }
-  .player-shell:fullscreen,.player-shell:-webkit-full-screen{width:100vw;height:100dvh;max-height:none;aspect-ratio:auto;border-radius:0}
+  .player-shell:fullscreen,.player-shell:-webkit-full-screen{width:100vw;height:100dvh;max-height:none;aspect-ratio:auto;border-radius:0;border:0}
   .player video{width:100%;height:100%;object-fit:contain}
-  .player-top,.player-controls{
-    position:absolute;left:0;right:0;z-index:1;display:flex;align-items:center;gap:12px;
-    padding:18px clamp(14px,3vw,30px);transition:opacity .35s;
+  .player-top{
+    position:absolute;top:0;left:0;right:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:14px;
+    padding:max(18px,env(safe-area-inset-top)) clamp(16px,3vw,28px) 40px;
+    background:linear-gradient(rgba(10,6,20,.6),transparent);
+    transition:opacity .6s var(--ease),transform .6s var(--ease);
   }
-  .player-top{top:0;justify-content:space-between;background:linear-gradient(rgba(0,0,0,.72),transparent)}
-  .player-controls{bottom:0;flex-wrap:wrap;background:linear-gradient(transparent,rgba(0,0,0,.82))}
-  .player-name{font:500 1rem var(--ui);text-shadow:0 1px 8px #000}
-  .player button{padding:9px 13px;background:rgba(255,255,255,.14);white-space:nowrap}
-  .player-play{min-width:88px}
-  .player-time{font:400 .83rem var(--ui);font-variant-numeric:tabular-nums;color:#e5eaf2}
-  .player-seek{flex:1 1 160px;min-width:100px;accent-color:#cfe7ff}
-  .player-volume{width:clamp(70px,12vw,130px);accent-color:#cfe7ff}
-  .player-shell.idle .player-top,.player-shell.idle .player-controls{opacity:0;pointer-events:none}
-  .player-error{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;color:var(--ink)}
+  .player-name{font:500 1.02rem var(--ui);text-shadow:0 1px 10px rgba(0,0,0,.7);min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .player-controls{
+    position:absolute;left:clamp(12px,2vw,22px);right:clamp(12px,2vw,22px);bottom:max(14px,env(safe-area-inset-bottom));z-index:2;
+    display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:30px;
+    background:var(--glass-fill),rgba(20,12,36,.34);
+    -webkit-backdrop-filter:blur(26px) saturate(180%);backdrop-filter:blur(26px) saturate(180%);
+    border:1px solid rgba(255,255,255,.26);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 20px 50px -16px rgba(0,0,0,.7);
+    transition:opacity .6s var(--ease),transform .6s var(--ease);
+  }
+  .player-shell.idle{cursor:none}
+  .player-shell.idle .player-top{opacity:0;transform:translateY(-8px);pointer-events:none}
+  .player-shell.idle .player-controls{opacity:0;transform:translateY(10px);pointer-events:none}
+  .pbtn{
+    appearance:none;color:#fff;cursor:pointer;flex:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    min-width:44px;height:44px;padding:0 12px;border-radius:999px;font:500 .9rem var(--ui);
+    background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.26);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.5);
+    transition:background .3s,transform .4s var(--ease);
+  }
+  .pbtn:hover{background:rgba(255,255,255,.3)}
+  .pbtn:active{transform:scale(.93)}
+  .pbtn svg{width:22px;height:22px;fill:currentColor;display:block}
+  .pbtn.plain{background:transparent;border-color:transparent;box-shadow:none}
+  .pbtn.plain:hover{background:rgba(255,255,255,.18)}
+  #player-leave{-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur)}
+  .player-time{font:400 .84rem var(--ui);font-variant-numeric:tabular-nums;color:#fff;opacity:.92;min-width:2.6em;text-align:center}
+  .player input[type=range]{
+    -webkit-appearance:none;appearance:none;height:4px;border-radius:2px;margin:0;cursor:pointer;outline:none;
+    background:linear-gradient(to right,#fff var(--p,0%),rgba(255,255,255,.3) var(--p,0%));
+  }
+  .player input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.45);transition:transform .3s var(--ease)}
+  .player input[type=range]::-moz-range-thumb{width:15px;height:15px;border:0;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.45)}
+  .player input[type=range]:hover::-webkit-slider-thumb{transform:scale(1.25)}
+  .player-seek{flex:1 1 140px;min-width:80px}
+  .vol{display:flex;align-items:center;gap:4px;flex:none}
+  .player-volume{width:clamp(64px,10vw,110px)}
+  .player-error{
+    position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:28px;color:#fff;z-index:1;
+    background:rgba(10,6,20,.55);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  }
   .player-error[hidden]{display:none}
+
   .toast{
-    position:fixed;left:50%;bottom:76px;z-index:6;transform:translate(-50%,20px);
-    background:rgba(231,241,255,.2);border:1px solid var(--glass-edge);
-    box-shadow:inset 0 1px rgba(255,255,255,.3),0 16px 40px rgba(13,25,42,.2);
-    backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
-    padding:12px 20px;border-radius:14px;font-size:.92rem;max-width:90vw;text-align:center;
-    opacity:0;pointer-events:none;transition:opacity .35s, transform .35s;
+    position:fixed;left:50%;bottom:34px;z-index:40;transform:translate(-50%,20px);
+    padding:13px 22px;border-radius:20px;font-size:.92rem;max-width:90vw;text-align:center;color:#fff;
+    opacity:0;pointer-events:none;transition:opacity .5s var(--ease),transform .6s var(--ease);
   }
   .toast.show{opacity:1;transform:translate(-50%,0)}
 
@@ -262,24 +326,26 @@
   @media (max-width:560px){
     .bar{justify-content:center}
     .search{flex:1 1 100%}
-    .grid{grid-template-columns:minmax(0,1fr);gap:18px}
-    .card .initial{font-size:7rem}
+    .grid{grid-template-columns:minmax(0,1fr);gap:20px}
     .media-heading{align-items:flex-start}
     .media-actions{flex-direction:column}
-    .player-shell{width:100%;aspect-ratio:auto;height:min(70vh,520px)}
-    .player-controls{gap:8px;padding:12px}
-    .player-volume-label{display:none}
+    .player-shell{width:100%;aspect-ratio:auto;height:min(70vh,520px);border-radius:26px}
+    .player-controls{gap:6px;padding:8px 10px}
+    .player-volume{display:none}
+    .player-time{font-size:.78rem;min-width:2.2em}
   }
   @media (prefers-reduced-motion:reduce){
     *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
-    .card .bg{animation:none}
+    .card .bg,.card .shine{animation:none}
   }
 </style>
 </head>
 <body>
-<video class="backdrop-video" id="backdrop" autoplay muted loop playsinline preload="metadata" aria-hidden="true"></video>
-<div class="backdrop-shade" aria-hidden="true"></div>
-<div class="fog" aria-hidden="true"><i></i><i></i><i></i></div>
+<video class="backdrop-video" id="backdrop" poster="background-poster.jpg" autoplay muted loop playsinline preload="auto" aria-hidden="true" tabindex="-1">
+  <source src="background.mp4" type="video/mp4">
+  <source src="Untitled%20design.mp4" type="video/mp4">
+</video>
+<div class="veil" aria-hidden="true"></div>
 
 <div class="wrap">
   <header>
@@ -319,16 +385,18 @@
     <div class="player-error" id="player-error" role="status" hidden></div>
     <div class="player-top">
       <span class="player-name" id="player-name"></span>
-      <button id="player-leave" type="button" aria-label="Close player">✕ Leave</button>
+      <button class="pbtn" id="player-leave" type="button" aria-label="Close player"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12 19 6.4 17.6 5 12 10.6z"/></svg>Leave</button>
     </div>
     <div class="player-controls">
-      <button class="player-play" id="player-play" type="button" aria-label="Play">▶ Play</button>
+      <button class="pbtn" id="player-play" type="button" aria-label="Play"></button>
       <span class="player-time" id="player-current">0:00</span>
       <input class="player-seek" id="player-seek" type="range" min="0" max="1000" value="0" aria-label="Seek video">
       <span class="player-time" id="player-duration">0:00</span>
-      <label class="player-volume-label" for="player-volume">Volume</label>
-      <input class="player-volume" id="player-volume" type="range" min="0" max="1" step="0.05" value="1" aria-label="Volume">
-      <button id="player-fullscreen" type="button">⛶ Fullscreen</button>
+      <div class="vol">
+        <button class="pbtn plain" id="player-mute" type="button" aria-label="Mute"></button>
+        <input class="player-volume" id="player-volume" type="range" min="0" max="1" step="0.05" value="1" aria-label="Volume">
+      </div>
+      <button class="pbtn plain" id="player-fullscreen" type="button" aria-label="Fullscreen"></button>
     </div>
   </div>
 </div>
@@ -379,10 +447,35 @@ function pretty(s) {
 }
 function hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
 
+// the little circle on panels that have no cover image: "Season 1" -> 1, "Test Game" -> T
+function monoOf(t) {
+  const m = t.trim().match(/^(?:season|episode|ep|e|s)[\s._-]*(\d+)/i);
+  return m ? String(Number(m[1])) : (t.trim()[0] || '?').toUpperCase();
+}
+
 let toastTimer;
 function toast(msg) {
   const t = $('#toast'); t.textContent = msg; t.classList.add('show');
   clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 4200);
+}
+
+// panels only animate while they're on screen
+const io = 'IntersectionObserver' in window
+  ? new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('vis', e.isIntersecting)), { rootMargin: '120px' })
+  : null;
+const watchCard = (n) => io ? io.observe(n) : n.classList.add('vis');
+
+function tilt(card, amount) {
+  card.addEventListener('pointermove', e => {
+    if (e.pointerType !== 'mouse' || reduced) return;
+    const r = card.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+    card.style.setProperty('--mx', (x * 100) + '%');
+    card.style.setProperty('--my', (y * 100) + '%');
+    card.style.setProperty('--ry', ((x - .5) * amount) + 'deg');
+    card.style.setProperty('--rx', ((.5 - y) * amount) + 'deg');
+  });
+  card.addEventListener('pointerleave', () => { card.style.setProperty('--rx', '0deg'); card.style.setProperty('--ry', '0deg'); });
 }
 
 /* ================================================================
@@ -471,6 +564,12 @@ function buildGames(paths, folderRx) {
     .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
 }
 
+// "S1" and "season 2" both become "Season 1" / "Season 2"
+function seasonLabel(folder) {
+  const m = folder.match(/(\d+)/);
+  return m ? 'Season ' + Number(m[1]) : pretty(folder);
+}
+
 function buildShows(paths) {
   const shows = new Map();
   for (const path of paths) {
@@ -481,7 +580,7 @@ function buildShows(paths) {
     const show = shows.get(showPath);
     const seasonName = parts[2];
     if (!/^(?:s\d+|season[\s._-]*\d+)$/i.test(seasonName)) continue;
-    if (!show.seasons.has(seasonName)) show.seasons.set(seasonName, { name: pretty(seasonName), episodes: new Map() });
+    if (!show.seasons.has(seasonName)) show.seasons.set(seasonName, { name: seasonLabel(seasonName), episodes: new Map() });
     const season = show.seasons.get(seasonName);
     let episodeName, videoPath;
     if (parts.length === 4 && VIDEO_RX.test(parts[3])) {
@@ -545,6 +644,25 @@ function launch(game) {
 const grid = $('#grid');
 let allCards = [];
 
+const PLAY_SVG = '<svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg>';
+
+function cardMarkup(title, detail, cover) {
+  return '<div class="bg"></div>' +
+    (cover ? '<img class="cover" alt="" loading="lazy" decoding="async" src="' + esc(BASE + enc(cover)) + '">' : '') +
+    '<div class="gloss"></div><div class="shine"></div>' +
+    '<div class="mono" aria-hidden="true">' + esc(monoOf(title)) + '</div>' +
+    '<div class="label"><span class="lt"><span class="name">' + esc(title) + '</span>' +
+    (detail ? '<span class="meta">' + esc(detail) + '</span>' : '') +
+    '</span><span class="play" aria-hidden="true">' + PLAY_SVG + '</span></div>';
+}
+
+function wireCover(card) {
+  const img = card.querySelector('.cover');
+  if (!img) return;
+  card.classList.add('has-cover');
+  img.addEventListener('error', () => { img.remove(); card.classList.remove('has-cover'); });
+}
+
 function makeCard(game, i) {
   const h = hash(game.name) % 360;
   const a = document.createElement('a');
@@ -553,40 +671,24 @@ function makeCard(game, i) {
   a.dataset.name = game.name.toLowerCase();
   a.style.setProperty('--h', h);
   a.style.setProperty('--d', (-(hash(game.name + 'd') % 14)) + 's');
-  a.style.setProperty('--stagger', Math.min(i, 14) * 0.05 + 's');
+  a.style.setProperty('--stagger', Math.min(i, 14) * 0.06 + 's');
   a.setAttribute('aria-label', 'Open ' + game.name);
-  a.innerHTML =
-    '<div class="bg"></div>' +
-    (game.cover ? '<img class="cover" alt="" loading="lazy" src="' + esc(BASE + enc(game.cover)) + '">' : '') +
-    '<div class="initial">' + esc(game.name.trim()[0] || '?') + '</div>' +
-    '<div class="label"><span class="name">' + esc(game.name) + '</span>' +
-    '<span class="play"><svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></span></div>';
-
-  const img = a.querySelector('.cover');
-  if (img) img.addEventListener('error', () => img.remove());
+  a.innerHTML = cardMarkup(game.name, '', game.cover);
+  wireCover(a);
 
   a.addEventListener('click', (e) => {
     if (e.ctrlKey || e.metaKey || e.shiftKey || e.button === 1) return;
     e.preventDefault(); launch(game);
   });
-
-  a.addEventListener('pointermove', (e) => {
-    if (e.pointerType !== 'mouse' || reduced) return;
-    const r = a.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
-    a.style.setProperty('--mx', (x * 100) + '%');
-    a.style.setProperty('--my', (y * 100) + '%');
-    a.style.setProperty('--ry', ((x - .5) * 9) + 'deg');
-    a.style.setProperty('--rx', ((.5 - y) * 9) + 'deg');
-  });
-  a.addEventListener('pointerleave', () => { a.style.setProperty('--rx', '0deg'); a.style.setProperty('--ry', '0deg'); });
+  tilt(a, 5);
   a.addEventListener('animationend', (e) => { if (e.animationName === 'cardIn') a.classList.remove('live'); });
+  watchCard(a);
   return a;
 }
 
 function showSkeletons() {
   grid.innerHTML = '';
-  for (let i = 0; i < 8; i++) { const s = document.createElement('div'); s.className = 'skeleton'; s.style.animationDelay = (i * .12) + 's'; grid.appendChild(s); }
+  for (let i = 0; i < 6; i++) { const s = document.createElement('div'); s.className = 'skeleton'; s.style.animationDelay = (i * .15) + 's'; grid.appendChild(s); }
 }
 
 function showNote(html) { const n = $('#note'); n.innerHTML = html; n.hidden = false; }
@@ -671,32 +773,15 @@ function makeMediaCard(title, detail, cover, action, index, episode = false) {
   button.className = 'card media-card live' + (episode ? ' episode-card' : '');
   button.dataset.name = (title + ' ' + detail).toLowerCase();
   button.style.setProperty('--h', hash(title) % 360);
-  button.style.setProperty('--stagger', Math.min(index, 14) * .05 + 's');
+  button.style.setProperty('--d', (-(hash(title + 'd') % 14)) + 's');
+  button.style.setProperty('--stagger', Math.min(index, 14) * .06 + 's');
   button.setAttribute('aria-label', `${title}${detail ? ', ' + detail : ''}`);
-  button.innerHTML =
-    '<div class="bg"></div>' +
-    (cover ? '<img class="cover" alt="" loading="lazy" src="' + esc(BASE + enc(cover)) + '">' : '') +
-    '<div class="initial">' + esc(title.trim()[0] || '?') + '</div>' +
-    '<div class="label"><span><span class="name">' + esc(title) + '</span>' +
-    (detail ? '<span class="meta">' + esc(detail) + '</span>' : '') +
-    '</span><span class="play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></span></div>';
-  const image = button.querySelector('.cover');
-  if (image) image.addEventListener('error', () => image.remove());
+  button.innerHTML = cardMarkup(title, detail, cover);
+  wireCover(button);
   button.addEventListener('click', action);
-  button.addEventListener('pointermove', e => {
-    if (e.pointerType !== 'mouse' || reduced) return;
-    const rect = button.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width, y = (e.clientY - rect.top) / rect.height;
-    button.style.setProperty('--mx', (x * 100) + '%');
-    button.style.setProperty('--my', (y * 100) + '%');
-    button.style.setProperty('--ry', ((x - .5) * 7) + 'deg');
-    button.style.setProperty('--rx', ((.5 - y) * 7) + 'deg');
-  });
-  button.addEventListener('pointerleave', () => {
-    button.style.setProperty('--rx', '0deg');
-    button.style.setProperty('--ry', '0deg');
-  });
+  tilt(button, 4);
   button.addEventListener('animationend', e => { if (e.animationName === 'cardIn') button.classList.remove('live'); });
+  watchCard(button);
   return button;
 }
 
@@ -800,6 +885,17 @@ const playerShell = $('#player-shell');
 const playerVideo = $('#episode-video');
 const playerPlay = $('#player-play');
 const playerError = $('#player-error');
+const playerSeek = $('#player-seek');
+const playerVolume = $('#player-volume');
+
+const ICON = {
+  play:  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.6v12.8a1 1 0 0 0 1.52.85l10.4-6.4a1 1 0 0 0 0-1.7L9.52 4.75A1 1 0 0 0 8 5.6z"/></svg>',
+  pause: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4.2" height="14" rx="1.5"/><rect x="13.8" y="5" width="4.2" height="14" rx="1.5"/></svg>',
+  vol:   '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 8.5a5 5 0 0 1 0 7v-2.2a2.8 2.8 0 0 0 0-2.6z"/><path d="M18.5 6a8.5 8.5 0 0 1 0 12l-1.4-1.4a6.5 6.5 0 0 0 0-9.2z"/></svg>',
+  mute:  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M15.6 9.4 17 8l2 2 2-2 1.4 1.4-2 2 2 2-1.4 1.4-2-2-2 2-1.4-1.4 2-2z"/></svg>',
+  fs:    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h5v2H7v3H5zM14 5h5v5h-2V7h-3zM5 14h2v3h3v2H5zM17 14h2v5h-5v-2h3z"/></svg>',
+  fsx:   '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5v5H5V8h3V5zM14 5h2v3h3v2h-5zM5 14h5v5H8v-3H5zM14 14h5v2h-3v3h-2z"/></svg>',
+};
 
 function formatTime(seconds) {
   if (!Number.isFinite(seconds)) return '0:00';
@@ -810,17 +906,30 @@ function formatTime(seconds) {
   return hours ? `${hours}:${String(minutes).padStart(2, '0')}:${remainder}` : `${minutes}:${remainder}`;
 }
 
+function paintRange(input) { input.style.setProperty('--p', (Number(input.value) / Number(input.max) * 100) + '%'); }
+
 function updatePlayButton() {
   const playing = !playerVideo.paused && !playerVideo.ended;
-  playerPlay.textContent = playing ? 'Ⅱ Pause' : '▶ Play';
+  playerPlay.innerHTML = playing ? ICON.pause : ICON.play;
   playerPlay.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+}
+function paintVolume() {
+  const silent = playerVideo.muted || playerVideo.volume === 0;
+  $('#player-mute').innerHTML = silent ? ICON.mute : ICON.vol;
+  $('#player-mute').setAttribute('aria-label', silent ? 'Unmute' : 'Mute');
+  paintRange(playerVolume);
+}
+function paintFullscreen() {
+  const on = !!document.fullscreenElement;
+  $('#player-fullscreen').innerHTML = on ? ICON.fsx : ICON.fs;
+  $('#player-fullscreen').setAttribute('aria-label', on ? 'Exit fullscreen' : 'Fullscreen');
 }
 
 function showPlayerControls() {
   playerShell.classList.remove('idle');
   clearTimeout(controlsTimer);
   if (playerVideo.paused || !playerError.hidden) return;
-  controlsTimer = setTimeout(() => playerShell.classList.add('idle'), 2600);
+  controlsTimer = setTimeout(() => playerShell.classList.add('idle'), 2800);
 }
 
 function openPlayer(episode, show, season) {
@@ -830,15 +939,16 @@ function openPlayer(episode, show, season) {
   playerShell.classList.remove('idle');
   $('#player-current').textContent = '0:00';
   $('#player-duration').textContent = '0:00';
-  $('#player-seek').value = '0';
+  playerSeek.value = '0'; paintRange(playerSeek);
   playerVideo.src = BASE + enc(episode.path);
-  playerVideo.volume = Number($('#player-volume').value);
+  playerVideo.volume = Number(playerVolume.value);
   player.hidden = false;
   document.body.style.overflow = 'hidden';
   backdrop.pause();
   $('#player-leave').focus();
   playerVideo.load();
   playerVideo.play().catch(() => showPlayerControls());
+  updatePlayButton(); paintVolume(); paintFullscreen();
 }
 
 function closePlayer() {
@@ -850,7 +960,7 @@ function closePlayer() {
   playerVideo.load();
   playerError.hidden = true;
   document.body.style.overflow = '';
-  if (!document.hidden) backdrop.play().catch(() => {});
+  if (!document.hidden) playBackdrop();
   if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
   if (playerOpener && playerOpener.isConnected) playerOpener.focus();
 }
@@ -862,11 +972,13 @@ playerPlay.addEventListener('click', () => {
 playerVideo.addEventListener('play', () => { updatePlayButton(); showPlayerControls(); });
 playerVideo.addEventListener('pause', () => { updatePlayButton(); showPlayerControls(); });
 playerVideo.addEventListener('ended', () => { updatePlayButton(); showPlayerControls(); });
+playerVideo.addEventListener('volumechange', paintVolume);
 playerVideo.addEventListener('loadedmetadata', () => { $('#player-duration').textContent = formatTime(playerVideo.duration); });
 playerVideo.addEventListener('timeupdate', () => {
   $('#player-current').textContent = formatTime(playerVideo.currentTime);
   if (Number.isFinite(playerVideo.duration) && playerVideo.duration > 0) {
-    $('#player-seek').value = String(Math.round(playerVideo.currentTime / playerVideo.duration * 1000));
+    playerSeek.value = String(Math.round(playerVideo.currentTime / playerVideo.duration * 1000));
+    paintRange(playerSeek);
   }
 });
 playerVideo.addEventListener('error', () => {
@@ -874,13 +986,20 @@ playerVideo.addEventListener('error', () => {
   playerError.hidden = false;
   showPlayerControls();
 });
-$('#player-seek').addEventListener('input', event => {
+playerSeek.addEventListener('input', event => {
   if (Number.isFinite(playerVideo.duration)) playerVideo.currentTime = Number(event.target.value) / 1000 * playerVideo.duration;
+  paintRange(playerSeek);
   showPlayerControls();
 });
-$('#player-volume').addEventListener('input', event => {
+playerVolume.addEventListener('input', event => {
+  playerVideo.muted = false;
   playerVideo.volume = Number(event.target.value);
   try { localStorage.setItem('cws-player-volume', event.target.value); } catch {}
+  showPlayerControls();
+});
+$('#player-mute').addEventListener('click', () => {
+  playerVideo.muted = !playerVideo.muted;
+  if (!playerVideo.muted && playerVideo.volume === 0) { playerVideo.volume = .5; playerVolume.value = '0.5'; }
   showPlayerControls();
 });
 $('#player-fullscreen').addEventListener('click', () => {
@@ -911,27 +1030,31 @@ playerShell.addEventListener('keydown', event => {
 document.addEventListener('keydown', event => {
   if (event.key === 'Escape' && !player.hidden) closePlayer();
 });
-document.addEventListener('fullscreenchange', () => {
-  $('#player-fullscreen').textContent = document.fullscreenElement ? '⛶ Exit fullscreen' : '⛶ Fullscreen';
-});
+document.addEventListener('fullscreenchange', paintFullscreen);
 
 let savedVolume;
 try { savedVolume = localStorage.getItem('cws-player-volume'); } catch {}
 if (savedVolume !== null && Number.isFinite(Number(savedVolume))) {
   const volume = Math.min(1, Math.max(0, Number(savedVolume)));
-  $('#player-volume').value = String(volume);
+  playerVolume.value = String(volume);
   playerVideo.volume = volume;
 }
+updatePlayButton(); paintVolume(); paintFullscreen();
 
 /* ================================================================
    VIDEO BACKGROUND
+   Tries background.mp4 first (the light 1080p copy), then the original "Untitled design.mp4".
+   Stays paused for people who ask their device to reduce motion or save data.
    ================================================================ */
 const backdrop = $('#backdrop');
-backdrop.src = BASE + enc('Untitled design.mp4');
-backdrop.addEventListener('error', () => toast('The background video could not be loaded.'));
+const backdropAllowed = !reduced && !(navigator.connection && navigator.connection.saveData);
+function playBackdrop() { if (backdropAllowed && player.hidden) backdrop.play().catch(() => {}); }
+if (!backdropAllowed) { backdrop.removeAttribute('autoplay'); backdrop.pause(); }
+else playBackdrop();
+backdrop.querySelector('source:last-of-type').addEventListener('error', () => toast('The background video could not be loaded.'));
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) backdrop.pause();
-  else backdrop.play().catch(() => {});
+  else playBackdrop();
 });
 
 /* ================================================================ */
