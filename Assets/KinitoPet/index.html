@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html xmlns='http://www.w3.org/1999/xhtml' lang='' xml:lang=''>
+<head><base href="https://cdn.jsdelivr.net/gh/truffled/g@c1036/games/kinitopet/"><script>(function(C) {
+  var G = typeof self !== "undefined" ? self : this;
+  if (G.__tz) return;
+  var IS_DOC = typeof document !== "undefined" && typeof Element !== "undefined";
+  var CDN = C.c;
+  var SKIP = /^(data:|blob:|javascript:|about:|mailto:|tel:|ws:|wss:|#)/i;
+  var units = Object.keys(C.u || {}).sort(function(a, b) {
+    return b.length - a.length;
+  });
+  var exts = Object.keys(C.x || {}).sort(function(a, b) {
+    return b.length - a.length;
+  });
+  var split = C.s || {};
+  var hostDir = C.h || (function() {
+    try {
+      var h = String(G.location.href);
+      if (/^(https?|file):/i.test(h)) return h.slice(0, h.lastIndexOf("/") + 1);
+    } catch (e) {
+    }
+    return null;
+  })();
+  function base() {
+    if (C.w) return C.w;
+    try {
+      return document.baseURI;
+    } catch (e) {
+      return C.b;
+    }
+  }
+  function rootFor(p, strict) {
+    for (var i = 0; i < units.length; i++) if (p.indexOf(units[i]) === 0) return C.u[units[i]];
+    return strict ? null : C.r;
+  }
+  function map(u) {
+    try {
+      if (u == null) return u;
+      if (typeof u !== "string") {
+        if (typeof URL !== "undefined" && u instanceof URL) u = u.href;
+        else if (u && typeof u.toString === "function") u = u.toString();
+        else return u;
+      }
+      var t = u.trim();
+      if (C.w && /^blob:/i.test(t) && /\/[^\/?#]*\.[A-Za-z0-9]{1,8}([?#].*)?$/.test(t)) {
+        return map(new URL(t.slice(t.lastIndexOf("/") + 1), C.w).href);
+      }
+      if (!t || SKIP.test(t)) return u;
+      var abs;
+      try {
+        abs = new URL(t, base());
+      } catch (e) {
+        return u;
+      }
+      var href = abs.href;
+      if (hostDir && href.indexOf(hostDir) === 0 && !(C.b.indexOf(hostDir) === 0)) {
+        return map(new URL(href.slice(hostDir.length), C.b).href);
+      }
+      if (abs.protocol !== "http:" && abs.protocol !== "https:") return u;
+      if (abs.origin === CDN && C.o && abs.pathname.indexOf("/gh/" + C.o + "/") === 0) {
+        var mm2 = /^\/gh\/[^/]+\/[^/@]+@[^/]+\//.exec(abs.pathname);
+        if (mm2) {
+          var rest = abs.pathname.slice(mm2[0].length), dp = rest;
+          try {
+            dp = decodeURIComponent(rest);
+          } catch (e) {
+          }
+          if (/[^\/]\/$/.test(rest) && dp.indexOf("_ext/") !== 0) rest += "index.html";
+          var want = rootFor("/" + dp, true);
+          if (want && want !== CDN + mm2[0]) return want + rest + abs.search + abs.hash;
+          return CDN + mm2[0] + rest + abs.search + abs.hash;
+        }
+        return href;
+      }
+      if (abs.origin === CDN && !/^\/(gh|npm|combine|wp)\//.test(abs.pathname) || /^(www\.)?truffled\.lol$/i.test(abs.hostname)) {
+        var dpp = abs.pathname;
+        try {
+          dpp = decodeURIComponent(dpp);
+        } catch (e) {
+        }
+        return rootFor(dpp) + abs.pathname.slice(1) + (/[^\/]\/$/.test(abs.pathname) ? "index.html" : "") + abs.search + abs.hash;
+      }
+      var hp = abs.host + abs.pathname;
+      for (var i = 0; i < exts.length; i++) {
+        if (hp.indexOf(exts[i]) === 0) {
+          var sp = abs.pathname;
+          try {
+            sp = decodeURIComponent(sp);
+          } catch (e) {
+          }
+          sp = "/_ext/" + abs.host + sp;
+          if (/\/$/.test(sp)) sp += "index.html";
+          else if (!/\.[A-Za-z0-9_]{1,12}$/.test(sp)) sp += "__x";
+          var er = rootFor(sp, true);
+          if (er) {
+            try {
+              return new URL(er + sp.slice(1)).href;
+            } catch (e) {
+            }
+          }
+          return C.x[exts[i]] + hp.slice(exts[i].length);
+        }
+      }
+      return href;
+    } catch (e) {
+      return u;
+    }
+  }
+  function bare(u) {
+    return String(u).replace(/[?#].*$/, "");
+  }
+  function splitKey(u) {
+    var b = bare(u);
+    if (split[b]) return b;
+    try {
+      var n = new URL(b).href;
+      if (split[n]) return n;
+    } catch (e) {
+    }
+    try {
+      var d = encodeURI(decodeURI(b));
+      if (split[d]) return d;
+    } catch (e) {
+    }
+    return null;
+  }
+  function splitInfo(u) {
+    var k = splitKey(u);
+    return k ? split[k] : null;
+  }
+  var PART = C.p || 19e6;
+  function partUrl(key, i) {
+    var info = split[key], segs = info[3];
+    if (segs) {
+      for (var j = segs.length - 1; j >= 0; j--) if (i >= segs[j][0]) return segs[j][1] + ".tzp" + i;
+    }
+    return key + ".tzp" + i;
+  }
+  var partCache = /* @__PURE__ */ new Map(), partLoads = {};
+  function cacheGet(k) {
+    var v = partCache.get(k);
+    if (v) {
+      partCache.delete(k);
+      partCache.set(k, v);
+    }
+    return v;
+  }
+  function cachePut(k, ab) {
+    partCache.delete(k);
+    partCache.set(k, ab);
+    while (partCache.size > 4) partCache.delete(partCache.keys().next().value);
+  }
+  function wholePart(key, i) {
+    var k = key + "|" + i, hit = cacheGet(k);
+    if (hit) return Promise.resolve(hit);
+    if (!partLoads[k]) partLoads[k] = getPart(key, i).then(function(r) {
+      delete partLoads[k];
+      cachePut(k, r[0]);
+      return r[0];
+    }, function(e) {
+      delete partLoads[k];
+      throw e;
+    });
+    return partLoads[k];
+  }
+  function getPart(key, i) {
+    var u = partUrl(key, i), tries = 0;
+    function go() {
+      return origFetch(u).then(function(r) {
+        if (!r.ok) throw new Error("part " + u + " " + r.status);
+        return r.arrayBuffer().then(function(ab) {
+          return [ab, r.status];
+        });
+      }).catch(function(e) {
+        if (++tries < 11) return new Promise(function(ok) {
+          setTimeout(ok, Math.min(1500 * tries, 6e3));
+        }).then(go);
+        throw e;
+      });
+    }
+    return go();
+  }
+  var merged = {};
+  function mergeBuf(u) {
+    var key = splitKey(u) || bare(u);
+    if (merged[key]) return merged[key];
+    var n = split[key][0], type = split[key][1] || "application/octet-stream";
+    var blobs = new Array(n), next = 1;
+    merged[key] = new Promise(function(ok, bad) {
+      var active = 0, done = 0, failed = false;
+      function pump() {
+        while (!failed && active < 4 && next <= n) {
+          (function(i) {
+            active++;
+            getPart(key, i).then(function(r) {
+              blobs[i - 1] = new Blob([r[0]]);
+              active--;
+              if (++done === n) ok(new Blob(blobs, { type }));
+              else pump();
+            }, function(e) {
+              failed = true;
+              bad(e);
+            });
+          })(next++);
+        }
+      }
+      pump();
+    });
+    return merged[key];
+  }
+  var blobUrls = {};
+  function mergeUrl(u) {
+    var key = splitKey(u) || bare(u);
+    if (!blobUrls[key]) blobUrls[key] = mergeBuf(key).then(function(b) {
+      return URL.createObjectURL(b);
+    });
+    return blobUrls[key];
+  }
+  function sizeOf(key) {
+    return split[key][2] || 0;
+  }
+  function parseRange(h, size) {
+    var m = /bytes=(\d*)-(\d*)/.exec(h || "");
+    if (!m) return null;
+    var a, b;
+    if (m[1] === "") {
+      a = Math.max(0, size - Number(m[2]));
+      b = size - 1;
+    } else {
+      a = Number(m[1]);
+      b = m[2] === "" ? size - 1 : Math.min(Number(m[2]), size - 1);
+    }
+    if (a > b || a >= size) return null;
+    return [a, b];
+  }
+  function rangeBlob(key, a, b) {
+    var i0 = Math.floor(a / PART), i1 = Math.floor(b / PART), jobs = [];
+    for (var i = i0; i <= i1; i++) {
+      (function(i2) {
+        var s = Math.max(a, i2 * PART) - i2 * PART, e = Math.min(b, (i2 + 1) * PART - 1) - i2 * PART;
+        jobs.push(wholePart(key, i2 + 1).then(function(ab) {
+          return new Uint8Array(ab, s, e - s + 1);
+        }));
+      })(i);
+    }
+    return Promise.all(jobs).then(function(bufs) {
+      return new Blob(bufs, { type: split[key][1] || "application/octet-stream" });
+    });
+  }
+  function rangeStream(key, a, b) {
+    var i = Math.floor(a / PART), last = Math.floor(b / PART), ahead = [];
+    function fill() {
+      while (ahead.length < 3 && i <= last) {
+        (function(i2) {
+          var s = Math.max(a, i2 * PART) - i2 * PART, e = Math.min(b, (i2 + 1) * PART - 1) - i2 * PART;
+          ahead.push(wholePart(key, i2 + 1).then(function(ab) {
+            return new Uint8Array(ab.slice(s, e + 1));
+          }));
+        })(i++);
+      }
+    }
+    return new ReadableStream({
+      pull: function(ctrl) {
+        fill();
+        if (!ahead.length) {
+          ctrl.close();
+          return;
+        }
+        return ahead.shift().then(function(u8) {
+          ctrl.enqueue(u8);
+          fill();
+        });
+      },
+      cancel: function() {
+        ahead = [];
+        i = last + 1;
+      }
+    });
+  }
+  function streamResponse(key) {
+    var n = split[key][0], next = 1, ahead = [];
+    var hdr = { "Content-Type": split[key][1] || "application/octet-stream", "Accept-Ranges": "bytes" };
+    if (sizeOf(key)) hdr["Content-Length"] = String(sizeOf(key));
+    function fill() {
+      while (ahead.length < 3 && next <= n) ahead.push(getPart(key, next++));
+    }
+    var rs = new ReadableStream({
+      pull: function(ctrl) {
+        fill();
+        if (!ahead.length) {
+          ctrl.close();
+          return;
+        }
+        return ahead.shift().then(function(r) {
+          ctrl.enqueue(new Uint8Array(r[0]));
+          fill();
+        });
+      },
+      cancel: function() {
+        ahead = [];
+        next = n + 1;
+      }
+    });
+    return new Response(rs, { status: 200, statusText: "OK", headers: hdr });
+  }
+  function splitFetch(key, input, init) {
+    var method = String(init && init.method || input && input.method || "GET").toUpperCase();
+    var range = null;
+    try {
+      range = new Headers(init && init.headers || input && typeof input === "object" && input.headers || void 0).get("range");
+    } catch (e) {
+    }
+    var size = sizeOf(key), type = split[key][1] || "application/octet-stream";
+    if (method === "HEAD") {
+      return Promise.resolve(new Response(null, { status: 200, headers: { "Content-Length": String(size), "Content-Type": type, "Accept-Ranges": "bytes" } }));
+    }
+    var rg = range && size ? parseRange(range, size) : null;
+    if (rg) {
+      return Promise.resolve(new Response(rangeStream(key, rg[0], rg[1]), { status: 206, statusText: "Partial Content", headers: { "Content-Type": type, "Content-Length": String(rg[1] - rg[0] + 1), "Content-Range": "bytes " + rg[0] + "-" + rg[1] + "/" + size, "Accept-Ranges": "bytes" } }));
+    }
+    if (merged[key]) return merged[key].then(function(b) {
+      return new Response(b, { status: 200, headers: { "Content-Type": type, "Content-Length": String(b.size) } });
+    });
+    return Promise.resolve(streamResponse(key));
+  }
+  var origFetch = G.fetch ? G.fetch.bind(G) : null;
+  G.__tz = { map, cfg: C };
+  if (origFetch) {
+    G.fetch = function(input, init) {
+      try {
+        var url = typeof input === "string" || typeof URL !== "undefined" && input instanceof URL ? String(input) : input && input.url;
+        if (url) {
+          var m = map(url);
+          if (splitInfo(m)) return splitFetch(splitKey(m), input, init);
+          if (m !== url) {
+            if (typeof input === "string" || input instanceof URL) input = m;
+            else input = new Request(m, input);
+          }
+          if (typeof m === "string" && m.indexOf(CDN + "/") === 0 && CDN !== G.location.origin) {
+            if (init && init.credentials === "include") init = Object.assign({}, init, { credentials: "omit" });
+            if (input && typeof input === "object" && !(input instanceof URL) && input.credentials === "include") input = new Request(input, { credentials: "omit" });
+          }
+          if (C.o && String(m).indexOf(CDN + "/gh/" + C.o + "/") === 0 && String(init && init.method || input && input.method || "GET").toUpperCase() === "GET") {
+            var tries = 0, inp = input;
+            var again = function() {
+              return origFetch(typeof inp === "string" ? inp : inp.clone ? inp.clone() : inp, init).then(function(r) {
+                if ((r.status === 403 || r.status === 429 || r.status >= 500) && ++tries < 11) {
+                  return new Promise(function(ok) {
+                    setTimeout(ok, Math.min(1500 * tries, 6e3));
+                  }).then(again);
+                }
+                return r;
+              });
+            };
+            return again();
+          }
+        }
+      } catch (e) {
+      }
+      return origFetch(input, init);
+    };
+  }
+  if (G.XMLHttpRequest) {
+    let partial2 = function(x) {
+      if (!oStatus || !oStatus.get) return;
+      Object.defineProperty(x, "status", { configurable: true, get: function() {
+        var v = oStatus.get.call(this);
+        return v === 200 ? 206 : v;
+      } });
+      Object.defineProperty(x, "statusText", { configurable: true, get: function() {
+        return oStatus.get.call(this) === 200 ? "Partial Content" : "";
+      } });
+    }, syncPart2 = function(key, i) {
+      var k = key + "|" + i, ab = cacheGet(k), q = null;
+      for (var t = 0; t < 4 && !ab; t++) {
+        q = new G.XMLHttpRequest();
+        oOpen.call(q, "GET", partUrl(key, i), false);
+        if (G.document) q.overrideMimeType("text/plain; charset=x-user-defined");
+        else q.responseType = "arraybuffer";
+        try {
+          oSend.call(q);
+        } catch (err) {
+          continue;
+        }
+        if (q.status !== 200) continue;
+        if (!G.document) ab = q.response;
+        else {
+          var txt = q.responseText, u8 = new Uint8Array(txt.length);
+          for (var j = 0; j < txt.length; j++) u8[j] = txt.charCodeAt(j) & 255;
+          ab = u8.buffer;
+        }
+        cachePut(k, ab);
+      }
+      if (!ab) throw new Error("part " + partUrl(key, i) + " " + (q && q.status));
+      return ab;
+    }, syncBytes2 = function(key, a, b) {
+      var out = [];
+      for (var i = Math.floor(a / PART); i <= Math.floor(b / PART); i++) {
+        var s = Math.max(a, i * PART) - i * PART, e = Math.min(b, (i + 1) * PART - 1) - i * PART;
+        out.push(new Uint8Array(syncPart2(key, i + 1), s, e - s + 1));
+      }
+      return new Blob(out, { type: split[key][1] || "application/octet-stream" });
+    };
+    var partial = partial2, syncPart = syncPart2, syncBytes = syncBytes2;
+    var XP = G.XMLHttpRequest.prototype;
+    var oOpen = XP.open, oSend = XP.send, oSRH = XP.setRequestHeader;
+    var oStatus = Object.getOwnPropertyDescriptor(XP, "status");
+    XP.open = function(method, url) {
+      var a = Array.prototype.slice.call(arguments);
+      var m = map(url);
+      if (Object.prototype.hasOwnProperty.call(this, "status")) {
+        delete this.status;
+        delete this.statusText;
+      }
+      var early = function(x) {
+        try {
+          var a0 = a.slice();
+          a0[1] = m;
+          oOpen.apply(x, a0);
+        } catch (e) {
+        }
+      };
+      if (splitInfo(m)) {
+        this.__tzs = { a, m, h: [], y: a[2] === false };
+        early(this);
+        return;
+      }
+      if (a[2] !== false && C.o && String(method).toUpperCase() === "GET" && typeof m === "string" && m.indexOf(CDN + "/gh/" + C.o + "/") === 0) {
+        this.__tzs = { a, m, h: [], r: 1 };
+        early(this);
+        return;
+      }
+      this.__tzs = null;
+      a[1] = m;
+      this.__tzcdn = typeof m === "string" && m.indexOf(CDN + "/") === 0 && CDN !== G.location.origin;
+      return oOpen.apply(this, a);
+    };
+    XP.setRequestHeader = function(k, v) {
+      if (this.__tzs) {
+        this.__tzs.h.push([k, v]);
+        return;
+      }
+      return oSRH.call(this, k, v);
+    };
+    XP.send = function(body) {
+      var s = this.__tzs, x = this;
+      if (!s) {
+        if (this.__tzcdn) try {
+          this.withCredentials = false;
+        } catch (e) {
+        }
+        return oSend.call(this, body);
+      }
+      if (s.r) {
+        var hdr = {};
+        s.h.forEach(function(h) {
+          hdr[h[0]] = h[1];
+        });
+        var tries = 0;
+        var go = function() {
+          return origFetch(s.m, { headers: hdr }).then(function(r) {
+            if ((r.status === 403 || r.status === 429 || r.status >= 500) && ++tries < 11) {
+              return new Promise(function(ok) {
+                setTimeout(ok, Math.min(1500 * tries, 6e3));
+              }).then(go);
+            }
+            return r;
+          });
+        };
+        go().then(function(r) {
+          if (!r.ok) throw new Error(String(r.status));
+          return r.blob();
+        }).then(function(b) {
+          var bu = URL.createObjectURL(b);
+          var a = s.a.slice();
+          a[1] = bu;
+          x.__tzs = null;
+          oOpen.apply(x, a);
+          s.h.forEach(function(h) {
+            if (String(h[0]).toLowerCase() !== "range") try {
+              oSRH.call(x, h[0], h[1]);
+            } catch (e) {
+            }
+          });
+          x.addEventListener("loadend", function() {
+            setTimeout(function() {
+              URL.revokeObjectURL(bu);
+            }, 1e3);
+          });
+          oSend.call(x, body);
+        }, function() {
+          x.__tzs = null;
+          var a = s.a.slice();
+          a[1] = s.m;
+          oOpen.apply(x, a);
+          s.h.forEach(function(h) {
+            try {
+              oSRH.call(x, h[0], h[1]);
+            } catch (e) {
+            }
+          });
+          oSend.call(x, body);
+        });
+        return;
+      }
+      var key = splitKey(s.m), rh = null;
+      s.h.forEach(function(h) {
+        if (String(h[0]).toLowerCase() === "range") rh = h[1];
+      });
+      var rg = rh && sizeOf(key) ? parseRange(rh, sizeOf(key)) : null;
+      s.h = s.h.filter(function(h) {
+        return String(h[0]).toLowerCase() !== "range";
+      });
+      if (s.y) {
+        var sb = URL.createObjectURL(syncBytes2(key, rg ? rg[0] : 0, rg ? rg[1] : sizeOf(key) - 1)), sa = s.a.slice();
+        sa[1] = sb;
+        if (String(sa[0]).toUpperCase() === "HEAD") sa[0] = "GET";
+        x.__tzs = null;
+        oOpen.apply(x, sa);
+        s.h.forEach(function(h) {
+          try {
+            oSRH.call(x, h[0], h[1]);
+          } catch (e) {
+          }
+        });
+        if (rg) partial2(x);
+        try {
+          return oSend.call(x, body);
+        } finally {
+          URL.revokeObjectURL(sb);
+        }
+      }
+      var src = rg ? rangeBlob(key, rg[0], rg[1]).then(function(b) {
+        return URL.createObjectURL(b);
+      }) : mergeUrl(s.m);
+      src.then(function(bu) {
+        if (rg) partial2(x);
+        var a = s.a.slice();
+        a[1] = bu;
+        if (String(a[0]).toUpperCase() === "HEAD") a[0] = "GET";
+        x.__tzs = null;
+        oOpen.apply(x, a);
+        s.h.forEach(function(h) {
+          try {
+            oSRH.call(x, h[0], h[1]);
+          } catch (e) {
+          }
+        });
+        oSend.call(x, body);
+      }, function() {
+        x.__tzs = null;
+        var a = s.a.slice();
+        a[1] = s.m;
+        oOpen.apply(x, a);
+        oSend.call(x, body);
+      });
+    };
+  }
+  var shimSrc = null;
+  function workerBlob(url, opts) {
+    var m = map(url);
+    var abs = new URL(m, base()).href;
+    var cfg = JSON.parse(JSON.stringify(C));
+    cfg.w = abs;
+    cfg.h = hostDir;
+    var pre = shimSrc ? "(" + shimSrc + ")(" + JSON.stringify(cfg) + ");" : "";
+    var body = opts && opts.type === "module" ? pre + "import " + JSON.stringify(abs) + ";" : pre + "importScripts(" + JSON.stringify(abs) + ");";
+    return URL.createObjectURL(new Blob([body], { type: "text/javascript" }));
+  }
+  function blobWorker(u, opts) {
+    var src = null;
+    try {
+      var x = new XMLHttpRequest();
+      oOpen.call(x, "GET", u, false);
+      oSend.call(x);
+      if (x.status === 200 || x.status === 0) src = x.responseText;
+    } catch (e) {
+    }
+    if (src == null) return u;
+    var cfg = JSON.parse(JSON.stringify(C));
+    cfg.w = base();
+    cfg.h = hostDir;
+    var pre = "(" + shimSrc + ")(" + JSON.stringify(cfg) + ");\n";
+    return URL.createObjectURL(new Blob([pre, src], { type: "text/javascript" }));
+  }
+  function needsWrap(u) {
+    try {
+      var abs = new URL(map(u), base());
+      return abs.protocol === "http:" || abs.protocol === "https:";
+    } catch (e) {
+      return false;
+    }
+  }
+  ["Worker", "SharedWorker"].forEach(function(k) {
+    var W = G[k];
+    if (!W) return;
+    var Wrapped = function(url, opts) {
+      var u = typeof url === "string" || url instanceof URL ? String(url) : url;
+      if (typeof u === "string" && needsWrap(u)) u = workerBlob(u, opts);
+      else if (typeof u === "string" && /^blob:/i.test(u) && shimSrc && IS_DOC) u = blobWorker(u, opts);
+      return opts === void 0 ? new W(u) : new W(u, opts);
+    };
+    Wrapped.prototype = W.prototype;
+    try {
+      Object.defineProperty(Wrapped, "name", { value: k });
+    } catch (e) {
+    }
+    G[k] = Wrapped;
+  });
+  if (G.Worklet && G.Worklet.prototype.addModule) {
+    var oAM = G.Worklet.prototype.addModule;
+    G.Worklet.prototype.addModule = function(u, o) {
+      return oAM.call(this, typeof u === "string" || u instanceof URL ? map(String(u)) : u, o);
+    };
+  }
+  if (!IS_DOC && typeof G.importScripts === "function") {
+    var oIS = G.importScripts;
+    G.importScripts = function() {
+      var a = Array.prototype.slice.call(arguments).map(function(u) {
+        return map(u);
+      });
+      return oIS.apply(G, a);
+    };
+  }
+  if (!IS_DOC) return;
+  try {
+    if (G.console && !console.logError) console.logError = console.error.bind(console);
+  } catch (e) {
+  }
+  try {
+    var SW = G.navigator && navigator.serviceWorker;
+    if (SW) {
+      var oReg = SW.register, oGet = SW.getRegistration, oGets = SW.getRegistrations;
+      SW.register = function(u, o) {
+        try {
+          if (new URL(map(String(u)), base()).origin !== G.location.origin) return new Promise(function() {
+          });
+        } catch (e) {
+        }
+        return oReg.apply(SW, arguments);
+      };
+      SW.getRegistration = function() {
+        return oGet.apply(SW, arguments).catch(function() {
+          return void 0;
+        });
+      };
+      SW.getRegistrations = function() {
+        return oGets.apply(SW, arguments).catch(function() {
+          return [];
+        });
+      };
+    }
+  } catch (e) {
+  }
+  ["pushState", "replaceState"].forEach(function(k) {
+    var H = G.History && G.History.prototype, o = H && H[k];
+    if (!o) return;
+    H[k] = function(st, t, u) {
+      try {
+        return o.apply(this, arguments);
+      } catch (e) {
+        if (arguments.length > 2) try {
+          return o.call(this, st, t);
+        } catch (e2) {
+        }
+      }
+    };
+  });
+  try {
+    if (!G.dataLayer) G.dataLayer = [];
+    if (typeof G.gtag !== "function") G.gtag = function() {
+      G.dataLayer.push(arguments);
+    };
+    if (typeof G.ga !== "function") G.ga = function() {
+    };
+    var par = G.parent;
+    if (par && par !== G) {
+      try {
+        if (typeof par.maeExportApis_ !== "function") par.maeExportApis_ = function() {
+        };
+      } catch (e) {
+      }
+    }
+    if (typeof G.maeExportApis_ !== "function") G.maeExportApis_ = function() {
+    };
+  } catch (e) {
+  }
+  function corsMedia(el, u) {
+    try {
+      if (el.crossOrigin == null && typeof u === "string" && u.indexOf(CDN + "/") === 0 && CDN !== G.location.origin) el.crossOrigin = "anonymous";
+    } catch (e) {
+    }
+  }
+  try {
+    shimSrc = String(document.currentScript && document.currentScript.textContent || "");
+  } catch (e) {
+  }
+  if (shimSrc) {
+    var mm = /^\s*\(function ?\(C\)[\s\S]*\}\)\(/.exec(shimSrc);
+    shimSrc = mm ? mm[0].replace(/\)\($/, "").replace(/^\s*\(/, "") : null;
+  }
+  function syncMerge(key) {
+    var info = split[key], n = info[0], parts = [];
+    for (var i = 1; i <= n; i++) {
+      var x = null, ok = false;
+      for (var t = 0; t < 8 && !ok; t++) {
+        if (t) {
+          var until = Date.now() + 1500 * t;
+          while (Date.now() < until) {
+          }
+        }
+        try {
+          x = new XMLHttpRequest();
+          oOpen.call(x, "GET", partUrl(key, i), false);
+          x.overrideMimeType("text/plain; charset=x-user-defined");
+          oSend.call(x);
+          ok = x.status === 200;
+        } catch (e) {
+        }
+      }
+      if (!ok) return null;
+      var txt = x.responseText, a = new Uint8Array(txt.length);
+      for (var j = 0; j < txt.length; j++) a[j] = txt.charCodeAt(j) & 255;
+      parts.push(a);
+    }
+    return URL.createObjectURL(new Blob(parts, { type: info[1] || "text/javascript" }));
+  }
+  function syncFetch(u) {
+    for (var t = 0; t < 8; t++) {
+      if (t) {
+        var until = Date.now() + 1500 * t;
+        while (Date.now() < until) {
+        }
+      }
+      try {
+        var x = new XMLHttpRequest();
+        oOpen.call(x, "GET", u, false);
+        oSend.call(x);
+        if (x.status === 200) return URL.createObjectURL(new Blob([x.responseText], { type: "text/javascript" }));
+      } catch (e) {
+      }
+    }
+    return null;
+  }
+  G.__tzw = function(pre, post, u) {
+    var key = splitKey(u);
+    var bu = key ? syncMerge(key) : syncFetch(u);
+    if (bu) {
+      blobUrls[key] = Promise.resolve(bu);
+      document.write(pre + ' src="' + bu + '"' + post + "><\/script>");
+      return;
+    }
+    var cur = document.currentScript, s = document.createElement("script");
+    s.async = false;
+    (key ? mergeUrl(u) : gzScript(u)).then(function(b) {
+      oSetAttr.call(s, "src", b);
+      if (cur && cur.parentNode) cur.parentNode.insertBefore(s, cur.nextSibling);
+      else document.head.appendChild(s);
+    });
+  };
+  function loadHtmlFrame(frame, url) {
+    origFetch(url).then(function(r) {
+      return r.text();
+    }).then(function(html) {
+      var w = frame.contentWindow;
+      if (!w) return;
+      var d = w.document;
+      html = prepHtml(html, url);
+      d.open();
+      d.write(html);
+      d.close();
+    });
+  }
+  function prepHtml(html, url) {
+    var dir = url.slice(0, url.lastIndexOf("/") + 1);
+    var tag = '<base href="' + dir + '">';
+    var cfg = JSON.parse(JSON.stringify(C));
+    delete cfg.w;
+    var sh = shimSrc ? "<script>(" + shimSrc + ")(" + JSON.stringify(cfg).replace(/<\//g, "<\\/") + ");<\/script>" : "";
+    if (/<base\b[^>]*>/i.test(html)) {
+      var mb = /<base\b[^>]*\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i.exec(html);
+      if (mb) tag = '<base href="' + new URL(mb[1] !== void 0 ? mb[1] : mb[2] !== void 0 ? mb[2] : mb[3], dir).href + '">';
+      html = html.replace(/<base\b[^>]*>/i, "");
+    }
+    if (/<head[^>]*>/i.test(html)) return html.replace(/<head[^>]*>/i, function(m) {
+      return m + tag + sh;
+    });
+    if (/<html[^>]*>/i.test(html)) return html.replace(/<html[^>]*>/i, function(m) {
+      return m + tag + sh;
+    });
+    return tag + sh + html;
+  }
+  function isHtml(u) {
+    try {
+      var p = new URL(u).pathname;
+      return /\.html?$/i.test(p) || /\/$/.test(p);
+    } catch (e) {
+      return false;
+    }
+  }
+  function cdnLike(u) {
+    try {
+      return new URL(u).origin === CDN;
+    } catch (e) {
+      return false;
+    }
+  }
+  var leaving = null;
+  function goPage(u) {
+    origFetch(u).then(function(r) {
+      if (!r.ok) throw new Error(String(r.status));
+      return r.text();
+    }).then(function(html) {
+      html = prepHtml(html, u);
+      var fe = null;
+      try {
+        fe = G.frameElement;
+      } catch (e) {
+      }
+      if (fe && fe.parentNode && !fe.getAttribute("src") && !fe.hasAttribute("srcdoc")) {
+        var nf = fe.cloneNode(false);
+        fe.parentNode.insertBefore(nf, fe);
+        var d = nf.contentDocument;
+        d.open();
+        d.write(html);
+        d.close();
+        try {
+          nf.contentWindow.focus();
+        } catch (e) {
+        }
+        fe.parentNode.removeChild(fe);
+        return;
+      }
+      document.open();
+      document.write(html);
+      document.close();
+      linkHook();
+    }).catch(function() {
+      leaving = u;
+      G.location.assign(u);
+    });
+  }
+  function goTo(u) {
+    var m = map(String(u));
+    if (typeof m !== "string" || !cdnLike(m) || !isHtml(m)) return false;
+    goPage(m);
+    return true;
+  }
+  if (IS_DOC) {
+    G.__tzgo = {
+      assign: function(u) {
+        if (!goTo(u)) G.location.assign(u);
+      },
+      replace: function(u) {
+        if (!goTo(u)) G.location.replace(u);
+      },
+      get href() {
+        return G.location.href;
+      },
+      set href(u) {
+        if (!goTo(u)) G.location.href = u;
+      }
+    };
+  }
+  function linkHook() {
+    document.addEventListener("click", function(e) {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      var a = e.target && e.target.closest ? e.target.closest("a[href]") : null;
+      if (!a || a.target && a.target !== "_self" || a.hasAttribute("download") || typeof a.href !== "string") return;
+      if (goTo(a.href)) e.preventDefault();
+    });
+  }
+  if (IS_DOC) linkHook();
+  if (IS_DOC && G.navigation && G.navigation.addEventListener) {
+    G.navigation.addEventListener("navigate", function(e) {
+      try {
+        var u = e.destination && e.destination.url;
+        if (!u || u === leaving || !e.cancelable || e.hashChange || e.downloadRequest != null || e.formData) return;
+        if (e.navigationType !== "push" && e.navigationType !== "replace") return;
+        var m = map(u);
+        if (typeof m !== "string" || !cdnLike(m) || !isHtml(m)) return;
+        e.preventDefault();
+        goPage(m);
+      } catch (err) {
+      }
+    });
+  }
+  function gzScript(m) {
+    return G.fetch(m).then(function(r) {
+      return r.arrayBuffer();
+    }).then(function(ab) {
+      var b = new Uint8Array(ab, 0, Math.min(2, ab.byteLength));
+      var js = b[0] === 31 && b[1] === 139 && G.DecompressionStream ? new Response(new Blob([ab]).stream().pipeThrough(new DecompressionStream("gzip"))).blob() : Promise.resolve(new Blob([ab]));
+      return js.then(function(x) {
+        return URL.createObjectURL(new Blob([x], { type: "text/javascript" }));
+      });
+    }).catch(function() {
+      return m;
+    });
+  }
+  function isGzScript(el, m) {
+    if (el.tagName !== "SCRIPT" || typeof m !== "string" || !cdnLike(m)) return false;
+    var p = bare(m), x = /\.([A-Za-z0-9]{1,12})$/.exec(p.slice(p.lastIndexOf("/") + 1));
+    return !!x && !/^(m?js|cjs)$/i.test(x[1]);
+  }
+  function hookProp(proto, prop, special) {
+    if (!proto) return;
+    var d = Object.getOwnPropertyDescriptor(proto, prop);
+    if (!d || !d.set || !d.configurable) return;
+    Object.defineProperty(proto, prop, {
+      configurable: true,
+      enumerable: d.enumerable,
+      get: d.get,
+      set: function(v) {
+        var el = this;
+        if (prop === "srcset") return d.set.call(el, mapSrcset(v));
+        var m = map(v);
+        if (typeof m === "string" && splitInfo(m)) {
+          mergeUrl(m).then(function(bu) {
+            d.set.call(el, bu);
+          });
+          return;
+        }
+        if (special && special(el, m, function(x) {
+          d.set.call(el, x);
+        })) return;
+        if (prop === "src" && isGzScript(el, m)) {
+          gzScript(m).then(function(u) {
+            d.set.call(el, u);
+          });
+          return;
+        }
+        if (prop === "src" && (el.tagName === "IMG" || el.tagName === "VIDEO" || el.tagName === "AUDIO")) corsMedia(el, m);
+        return d.set.call(el, m);
+      }
+    });
+  }
+  function mapSrcset(v) {
+    if (typeof v !== "string") return v;
+    return v.split(",").map(function(p) {
+      var t = p.trim();
+      if (!t) return t;
+      var sp = t.split(/\s+/);
+      sp[0] = map(sp[0]);
+      return sp.join(" ");
+    }).join(", ");
+  }
+  function iframeSpecial(el, m, set) {
+    if (typeof m === "string" && cdnLike(m) && isHtml(m)) {
+      set("about:blank");
+      var go = function() {
+        loadHtmlFrame(el, m);
+      };
+      if (el.isConnected) setTimeout(go, 0);
+      else el.__tzPending = go;
+      return true;
+    }
+    return false;
+  }
+  hookProp(G.HTMLScriptElement && HTMLScriptElement.prototype, "src");
+  hookProp(G.HTMLImageElement && HTMLImageElement.prototype, "src");
+  hookProp(G.HTMLImageElement && HTMLImageElement.prototype, "srcset");
+  hookProp(G.HTMLMediaElement && HTMLMediaElement.prototype, "src");
+  hookProp(G.HTMLSourceElement && HTMLSourceElement.prototype, "src");
+  hookProp(G.HTMLSourceElement && HTMLSourceElement.prototype, "srcset");
+  hookProp(G.HTMLLinkElement && HTMLLinkElement.prototype, "href");
+  hookProp(G.HTMLEmbedElement && HTMLEmbedElement.prototype, "src");
+  hookProp(G.HTMLObjectElement && HTMLObjectElement.prototype, "data");
+  hookProp(G.HTMLInputElement && HTMLInputElement.prototype, "src");
+  hookProp(G.HTMLIFrameElement && HTMLIFrameElement.prototype, "src", iframeSpecial);
+  try {
+    var svgHref = Object.getOwnPropertyDescriptor(SVGImageElement.prototype, "href");
+    void svgHref;
+  } catch (e) {
+  }
+  function cssMap(t) {
+    return typeof t !== "string" ? t : t.replace(/url\(\s*(["']?)([^"')]+)\1\s*\)/g, function(all, q, u) {
+      var m = map(u.trim());
+      return typeof m === "string" ? "url(" + q + m + q + ")" : all;
+    });
+  }
+  if (G.CSSStyleSheet) {
+    var CP = CSSStyleSheet.prototype;
+    ["insertRule", "replace", "replaceSync"].forEach(function(k) {
+      var o = CP[k];
+      if (o) CP[k] = function(t) {
+        var a = Array.prototype.slice.call(arguments);
+        a[0] = cssMap(t);
+        return o.apply(this, a);
+      };
+    });
+  }
+  if (G.FontFace) {
+    var OF = G.FontFace;
+    var NF = function FontFace(family, source, desc) {
+      return new OF(family, typeof source === "string" ? cssMap(source) : source, desc);
+    };
+    NF.prototype = OF.prototype;
+    G.FontFace = NF;
+  }
+  var oSetAttr = Element.prototype.setAttribute;
+  var ATTRS = { src: 1, href: 1, data: 1, poster: 1, srcset: 1, "xlink:href": 1 };
+  Element.prototype.setAttribute = function(name, value) {
+    var n = String(name).toLowerCase();
+    if (ATTRS[n] && typeof value === "string") {
+      var tag = this.tagName;
+      if (n === "href" && (tag === "A" || tag === "BASE" || tag === "AREA")) return oSetAttr.call(this, name, value);
+      if (n === "srcset") return oSetAttr.call(this, name, mapSrcset(value));
+      var m = map(value);
+      if (splitInfo(m)) {
+        var el = this;
+        mergeUrl(m).then(function(bu) {
+          oSetAttr.call(el, name, bu);
+        });
+        return;
+      }
+      if (tag === "IFRAME" && n === "src" && iframeSpecial(this, m, function(x) {
+        oSetAttr.call(this, name, x);
+      }.bind(this))) return;
+      if (n === "src" && isGzScript(this, m)) {
+        var se = this;
+        gzScript(m).then(function(u) {
+          oSetAttr.call(se, name, u);
+        });
+        return;
+      }
+      return oSetAttr.call(this, name, m);
+    }
+    return oSetAttr.call(this, name, value);
+  };
+  var oAppend = Node.prototype.appendChild, oInsert = Node.prototype.insertBefore;
+  function flushPending(n) {
+    if (n && n.__tzPending) {
+      var go = n.__tzPending;
+      n.__tzPending = null;
+      setTimeout(go, 0);
+    }
+  }
+  Node.prototype.appendChild = function(n) {
+    var r = oAppend.call(this, n);
+    flushPending(n);
+    return r;
+  };
+  Node.prototype.insertBefore = function(n, ref) {
+    var r = oInsert.call(this, n, ref);
+    flushPending(n);
+    return r;
+  };
+  if (G.Audio) {
+    var OA = G.Audio;
+    var NA = function Audio(src) {
+      var a = new OA();
+      if (src !== void 0) a.src = src;
+      return a;
+    };
+    NA.prototype = OA.prototype;
+    G.Audio = NA;
+  }
+  var oOpenWin = G.open;
+  if (oOpenWin) {
+    G.open = function(u) {
+      var a = Array.prototype.slice.call(arguments);
+      if (typeof u === "string" && u) a[0] = map(u);
+      return oOpenWin.apply(G, a);
+    };
+  }
+  function fixStatic(root) {
+    var list = root.querySelectorAll ? root.querySelectorAll("iframe[data-tz-src]") : [];
+    for (var i = 0; i < list.length; i++) {
+      var f = list[i];
+      var s = f.getAttribute("data-tz-src");
+      f.removeAttribute("data-tz-src");
+      var m = map(s);
+      if (cdnLike(m) && isHtml(m)) loadHtmlFrame(f, m);
+      else oSetAttr.call(f, "src", m);
+    }
+  }
+  G.addEventListener("error", function(e) {
+    var el = e.target;
+    if (!el || el === G || !el.tagName) return;
+    var tag = el.tagName, attr = tag === "LINK" ? "href" : "src";
+    var u = String(el[attr] || "");
+    if (u.indexOf(CDN + "/gh/") !== 0) return;
+    var n = el.__tzRetry || 0;
+    if (n >= 9) return;
+    setTimeout(function() {
+      var v = u.replace(/([?&])tzr=\d+&?/, "$1").replace(/[?&]$/, "");
+      v = v + (v.indexOf("?") >= 0 ? "&" : "?") + "tzr=" + (n + 1);
+      if (tag === "SCRIPT" || tag === "LINK") {
+        var c = document.createElement(tag.toLowerCase());
+        for (var i = 0; i < el.attributes.length; i++) oSetAttr.call(c, el.attributes[i].name, el.attributes[i].value);
+        if (tag === "SCRIPT") c.async = el.async;
+        c.__tzRetry = n + 1;
+        oSetAttr.call(c, attr, v);
+        if (el.parentNode) el.parentNode.insertBefore(c, el.nextSibling);
+        el.remove();
+      } else {
+        el.__tzRetry = n + 1;
+        oSetAttr.call(el, attr, v);
+        if (tag === "SOURCE" && el.parentNode && el.parentNode.load) el.parentNode.load();
+      }
+    }, Math.min(1500 * (n + 1), 6e3));
+  }, true);
+  if (G.MutationObserver) {
+    new MutationObserver(function(recs) {
+      for (var i = 0; i < recs.length; i++) {
+        var a = recs[i].addedNodes;
+        for (var j = 0; j < a.length; j++) {
+          var n = a[j];
+          if (n.nodeType !== 1) continue;
+          if (n.tagName === "IFRAME" && n.hasAttribute("data-tz-src")) fixStatic(n.parentNode || document);
+          else if (n.querySelector && n.querySelector("iframe[data-tz-src]")) fixStatic(n);
+        }
+      }
+    }).observe(document, { childList: true, subtree: true });
+  }
+})({"c":"https://cdn.jsdelivr.net","o":"truffled","p":19000000,"b":"https://cdn.jsdelivr.net/gh/truffled/g@c1036/games/kinitopet/","r":"https://cdn.jsdelivr.net/gh/truffled/g@c1036/","u":{"/games/kinitopet/index.html":"https://cdn.jsdelivr.net/gh/truffled/g@c1036/","/games/kinitopet/index.144x144.png":"https://cdn.jsdelivr.net/gh/truffled/g@c1036/","/games/kinitopet/index.apple-touch-icon.png":"https://cdn.jsdelivr.net/gh/truffled/g@c1036/","/games/kinitopet/index.audio.worklet.js":"https://cdn.jsdelivr.net/gh/truffled/g@c1036/","/games/kinitopet/index.icon.png":"https://cdn.jsdelivr.net/gh/truffled/g@c1036/","/games/kinitopet/index.js":"https://cdn.jsdelivr.net/gh/truffled/g@c1036/","/games/kinitopet/index.manifest.json":"https://cdn.jsdelivr.net/gh/truffled/g@c1036/","/games/kinitopet/index.pck":"https://cdn.jsdelivr.net/gh/truffled/g@c1037/","/games/kinitopet/index.wasm":"https://cdn.jsdelivr.net/gh/truffled/g@c1038/","/games/kinitopet/index.worker.js":"https://cdn.jsdelivr.net/gh/truffled/g@c1038/"},"x":{},"s":{"https://cdn.jsdelivr.net/gh/truffled/g@c1037/games/kinitopet/index.pck":[22,"application/octet-stream",406815840,[[1,"https://cdn.jsdelivr.net/gh/truffled/g@c1037/games/kinitopet/index.pck"],[3,"https://cdn.jsdelivr.net/gh/truffled/g@c1989/games/kinitopet/index.pck"],[5,"https://cdn.jsdelivr.net/gh/truffled/g@c1990/games/kinitopet/index.pck"],[7,"https://cdn.jsdelivr.net/gh/truffled/g@c1991/games/kinitopet/index.pck"],[9,"https://cdn.jsdelivr.net/gh/truffled/g@c1992/games/kinitopet/index.pck"],[11,"https://cdn.jsdelivr.net/gh/truffled/g@c1993/games/kinitopet/index.pck"],[13,"https://cdn.jsdelivr.net/gh/truffled/g@c1994/games/kinitopet/index.pck"],[15,"https://cdn.jsdelivr.net/gh/truffled/g@c1995/games/kinitopet/index.pck"],[17,"https://cdn.jsdelivr.net/gh/truffled/g@c1996/games/kinitopet/index.pck"],[19,"https://cdn.jsdelivr.net/gh/truffled/g@c1997/games/kinitopet/index.pck"],[21,"https://cdn.jsdelivr.net/gh/truffled/g@c1998/games/kinitopet/index.pck"]]]}});</script>
+	<meta charset='utf-8' />
+	<meta name='viewport' content='width=device-width, user-scalable=no' />
+	<title>KinitoPET</title>
+	
+	<style type='text/css'>
+
+		body {
+			touch-action: none;
+			margin: 0;
+			border: 0 none;
+			padding: 0;
+			text-align: center;
+			background-color: black;
+		}
+
+		#canvas {
+			display: block;
+			margin: 0;
+			color: white;
+		}
+
+		#canvas:focus {
+			outline: none;
+		}
+
+		.godot {
+			font-family: 'Noto Sans', 'Droid Sans', Arial, sans-serif;
+			color: #e0e0e0;
+			background-color: #3b3943;
+			background-image: linear-gradient(to bottom, #403e48, #35333c);
+			border: 1px solid #45434e;
+			box-shadow: 0 0 1px 1px #2f2d35;
+		}
+
+
+		/* Status display
+		 * ============== */
+
+		#status {
+			position: absolute;
+			left: 0;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			/* don't consume click events - make children visible explicitly */
+			visibility: hidden;
+		}
+
+		#status-progress {
+			width: 366px;
+			height: 7px;
+			background-color: #38363A;
+			border: 1px solid #444246;
+			padding: 1px;
+			box-shadow: 0 0 2px 1px #1B1C22;
+			border-radius: 2px;
+			visibility: visible;
+		}
+
+		@media only screen and (orientation:portrait) {
+			#status-progress {
+				width: 61.8%;
+			}
+		}
+
+		#status-progress-inner {
+			height: 100%;
+			width: 0;
+			box-sizing: border-box;
+			transition: width 0.5s linear;
+			background-color: #202020;
+			border: 1px solid #222223;
+			box-shadow: 0 0 1px 1px #27282E;
+			border-radius: 3px;
+		}
+
+		#status-indeterminate {
+			height: 42px;
+			visibility: visible;
+			position: relative;
+		}
+
+		#status-indeterminate > div {
+			width: 4.5px;
+			height: 0;
+			border-style: solid;
+			border-width: 9px 3px 0 3px;
+			border-color: #2b2b2b transparent transparent transparent;
+			transform-origin: center 21px;
+			position: absolute;
+		}
+
+		#status-indeterminate > div:nth-child(1) { transform: rotate( 22.5deg); }
+		#status-indeterminate > div:nth-child(2) { transform: rotate( 67.5deg); }
+		#status-indeterminate > div:nth-child(3) { transform: rotate(112.5deg); }
+		#status-indeterminate > div:nth-child(4) { transform: rotate(157.5deg); }
+		#status-indeterminate > div:nth-child(5) { transform: rotate(202.5deg); }
+		#status-indeterminate > div:nth-child(6) { transform: rotate(247.5deg); }
+		#status-indeterminate > div:nth-child(7) { transform: rotate(292.5deg); }
+		#status-indeterminate > div:nth-child(8) { transform: rotate(337.5deg); }
+
+		#status-notice {
+			margin: 0 100px;
+			line-height: 1.3;
+			visibility: visible;
+			padding: 4px 6px;
+			visibility: visible;
+		}
+	</style>
+<link id='-gd-engine-icon' rel='icon' type='image/png' href='https://cdn.jsdelivr.net/gh/truffled/g@c1036/games/kinitopet/index.icon.png' />
+<link rel='apple-touch-icon' href='https://cdn.jsdelivr.net/gh/truffled/g@c1036/games/kinitopet/index.apple-touch-icon.png'/>
+<link rel='manifest' href='https://cdn.jsdelivr.net/gh/truffled/g@c1036/games/kinitopet/index.manifest.json'>
+
+</head>
+<body>
+	<canvas id='canvas'>
+		HTML5 canvas appears to be unsupported in the current browser.<br />
+		Please try updating or use a different browser.
+	</canvas>
+	<div id='status'>
+		<div id='status-progress' style='display: none;' oncontextmenu='event.preventDefault();'><div id ='status-progress-inner'></div></div>
+		<div id='status-indeterminate' style='display: none;' oncontextmenu='event.preventDefault();'>
+			<div></div>
+			<div></div>
+			<div></div>
+			<div></div>
+			<div></div>
+			<div></div>
+			<div></div>
+			<div></div>
+		</div>
+		<div id='status-notice' class='godot' style='display: none;'></div>
+	</div>
+
+	<script type='text/javascript' src='https://cdn.jsdelivr.net/gh/truffled/g@c1036/games/kinitopet/index.js'></script>
+	<script type='text/javascript'>//<![CDATA[
+
+		const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":406815840,"index.wasm":13790961},"focusCanvas":true,"gdnativeLibs":[]};
+		var engine = new Engine(GODOT_CONFIG);
+
+		(function() {
+			const INDETERMINATE_STATUS_STEP_MS = 100;
+			var statusProgress = document.getElementById('status-progress');
+			var statusProgressInner = document.getElementById('status-progress-inner');
+			var statusIndeterminate = document.getElementById('status-indeterminate');
+			var statusNotice = document.getElementById('status-notice');
+
+			var initializing = true;
+			var statusMode = 'hidden';
+
+			var animationCallbacks = [];
+			function animate(time) {
+				animationCallbacks.forEach(callback => callback(time));
+				requestAnimationFrame(animate);
+			}
+			requestAnimationFrame(animate);
+
+			function setStatusMode(mode) {
+
+				if (statusMode === mode || !initializing)
+					return;
+				[statusProgress, statusIndeterminate, statusNotice].forEach(elem => {
+					elem.style.display = 'none';
+				});
+				animationCallbacks = animationCallbacks.filter(function(value) {
+					return (value != animateStatusIndeterminate);
+				});
+				switch (mode) {
+					case 'progress':
+						statusProgress.style.display = 'block';
+						break;
+					case 'indeterminate':
+						statusIndeterminate.style.display = 'block';
+						animationCallbacks.push(animateStatusIndeterminate);
+						break;
+					case 'notice':
+						statusNotice.style.display = 'block';
+						break;
+					case 'hidden':
+						break;
+					default:
+						throw new Error('Invalid status mode');
+				}
+				statusMode = mode;
+			}
+
+			function animateStatusIndeterminate(ms) {
+				var i = Math.floor(ms / INDETERMINATE_STATUS_STEP_MS % 8);
+				if (statusIndeterminate.children[i].style.borderTopColor == '') {
+					Array.prototype.slice.call(statusIndeterminate.children).forEach(child => {
+						child.style.borderTopColor = '';
+					});
+					statusIndeterminate.children[i].style.borderTopColor = '#dfdfdf';
+				}
+			}
+
+			function setStatusNotice(text) {
+				while (statusNotice.lastChild) {
+					statusNotice.removeChild(statusNotice.lastChild);
+				}
+				var lines = text.split('\n');
+				lines.forEach((line) => {
+					statusNotice.appendChild(document.createTextNode(line));
+					statusNotice.appendChild(document.createElement('br'));
+				});
+			};
+
+			function displayFailureNotice(err) {
+				var msg = err.message || err;
+				console.error(msg);
+				setStatusNotice(msg);
+				setStatusMode('notice');
+				initializing = false;
+			};
+
+			if (!Engine.isWebGLAvailable()) {
+				displayFailureNotice('WebGL not available');
+			} else {
+				setStatusMode('indeterminate');
+				engine.startGame({
+					'onProgress': function (current, total) {
+						if (total > 0) {
+							statusProgressInner.style.width = current/total * 100 + '%';
+							setStatusMode('progress');
+							if (current === total) {
+								// wait for progress bar animation
+								setTimeout(() => {
+									setStatusMode('indeterminate');
+								}, 500);
+							}
+						} else {
+							setStatusMode('indeterminate');
+						}
+					},
+				}).then(() => {
+					setStatusMode('hidden');
+					initializing = false;
+				}, displayFailureNotice);
+			}
+		})();
+	//]]></script>
+</body>
+</html>
